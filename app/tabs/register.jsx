@@ -2,13 +2,19 @@ import { StyleSheet } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import Header from '../../components/Header';
 
-export default function HomeScreen() {
+export default function RegisterScreen() {
   return (
-    <View style={styles.container}>
+    <View style={styles.mainContainer}>
       <Header />
-      <View style={styles.content}>
+      <View style={styles.container}>
         <View style={styles.card}>
-          <Text style={styles.title}>INICIAR SESIÓN</Text>
+          <Text style={styles.title}>REGISTRO</Text>
+          
+          <Text style={styles.label}>Nombre completo</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ingrese su nombre completo"
+          />
           
           <Text style={styles.label}>Correo electrónico</Text>
           <TextInput
@@ -22,13 +28,20 @@ export default function HomeScreen() {
             placeholder="Ingrese su contraseña"
             secureTextEntry
           />
+          
+          <Text style={styles.label}>Confirmar contraseña</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Confirme su contraseña"
+            secureTextEntry
+          />
 
           <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Iniciar Sesión</Text>
+            <Text style={styles.buttonText}>Registrarse</Text>
           </TouchableOpacity>
 
           <TouchableOpacity>
-            <Text style={styles.forgotPassword}>¿OLVIDASTE TU CONTRASEÑA?</Text>
+            <Text style={styles.loginLink}>¿YA TIENES CUENTA? INICIA SESIÓN</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -37,72 +50,72 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  content: {
+  container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 35,
+    borderRadius: 20,
+    padding: 50,
     shadowColor: '#000',
     shadowOffset: {
-      width: 0,
-      height: 0,
+      width: 2,
+      height: 2,
     },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 10,
-    width: '90%',
-    maxWidth: 500,
-    aspectRatio: 1.2,
+    elevation: 5,
+    width: '100%',
+    maxWidth: 480,
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 30,
+    marginBottom: 20,
     textAlign: 'center',
+    color: '#000',
   },
   label: {
-    fontSize: 16,
-    marginBottom: 8,
+    fontSize: 15,
+    marginBottom: 5,
     color: '#000',
+    fontWeight: '500',
   },
   input: {
     width: '100%',
-    height: 50,
+    height: 45,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#000',
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 15,
+    paddingHorizontal: 15,
     marginBottom: 20,
     fontSize: 16,
-    justifyContent: 'center',
   },
   button: {
     backgroundColor: '#000',
-    padding: 16,
+    padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
   },
-  forgotPassword: {
+  loginLink: {
     color: '#000',
     textAlign: 'center',
     fontSize: 14,
-    textDecorationLine: 'underline',
-  },
+    marginTop: 5,
+  }
 });
