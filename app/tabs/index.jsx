@@ -1,43 +1,52 @@
 import { StyleSheet } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import Header from '../../components/Header';
 
 export default function TabOneScreen() {
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>INICIAR SESIÓN</Text>
-        
-        <Text style={styles.label}>Correo electrónico</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese su correo electrónico"
-        />
-        
-        <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese su contraseña"
-          secureTextEntry
-        />
+    <View style={styles.mainContainer}>
+      <Header />
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.title}>INICIAR SESIÓN</Text>
+          
+          <Text style={styles.label}>Correo electrónico</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ingrese su correo electrónico"
+          />
+          
+          <Text style={styles.label}>Contraseña</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ingrese su contraseña"
+            secureTextEntry
+          />
 
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Iniciar Sesión</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Iniciar Sesión</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity>
-          <Text style={styles.forgotPassword}>¿OLVIDASTE TU CONTRASEÑA?</Text>
-        </TouchableOpacity>
+          <TouchableOpacity>
+            <Text style={styles.forgotPassword}>¿OLVIDASTE TU CONTRASEÑA?</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 20,
   },
   card: {
     backgroundColor: '#fff',
