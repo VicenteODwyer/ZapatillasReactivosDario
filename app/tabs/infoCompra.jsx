@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Header from '../../components/Header';
 import visaIcon from '../../assets/visa-icon.png';
 import mastercardIcon from '../../assets/mastercard-icon.png';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const InfoCompra = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +19,28 @@ const InfoCompra = () => {
     pais: '',
     codigoPostal: ''
   });
+
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    const cargarTotal = async () => {
+      try {
+        const carritoGuardado = await AsyncStorage.getItem('carrito');
+        if (carritoGuardado) {
+          const productos = JSON.parse(carritoGuardado);
+          const totalCalculado = productos.reduce(
+            (sum, producto) => sum + (producto.precio * producto.cantidad), 
+            0
+          );
+          setTotal(totalCalculado);
+        }
+      } catch (error) {
+        console.error('Error al cargar el total:', error);
+      }
+    };
+
+    cargarTotal();
+  }, []);
 
   const handleInputChange = (name, value) => {
     setFormData(prevData => ({
@@ -105,6 +128,10 @@ const InfoCompra = () => {
                   <MaterialIcons name="shopping-cart" size={24} color="white" />
                   <Text style={styles.buttonText}>Finalizar Compra</Text>
                 </TouchableOpacity>
+                
+                <Text style={styles.totalText}>
+                  Total a pagar: ${total.toLocaleString()}
+                </Text>
               </View>
             </View>
 
@@ -258,19 +285,26 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#FF4D4D',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 15,
     borderRadius: 4,
-    marginTop: 20,
+    marginTop: 0,
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
     marginLeft: 10,
     fontWeight: '500',
+  },
+  totalText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 50,
+    color: '#333',
   },
 });
 

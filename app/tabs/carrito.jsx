@@ -4,8 +4,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import Header from '../../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const Carrito = () => {
+  const navigation = useNavigation();
   const [productos, setProductos] = useState([]);
   const [codigoPostal, setCodigoPostal] = useState('');
 
@@ -288,6 +290,7 @@ const Carrito = () => {
 
               {/* Botón continuar compra */}
               <Pressable
+                onPress={() => navigation.navigate('infoCompra')}
                 style={{
                   backgroundColor: '#000',
                   padding: 15,
@@ -300,7 +303,7 @@ const Carrito = () => {
                   fontSize: 16,
                   fontWeight: '600'
                 }}>
-                  Continuar con la compra →
+                  Finalizar Compra →
                 </Text>
               </Pressable>
             </View>
