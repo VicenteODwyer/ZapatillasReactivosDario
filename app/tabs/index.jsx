@@ -5,9 +5,10 @@ import {
     Image, 
     StyleSheet, 
     Dimensions,
-    TouchableOpacity,
+    Pressable,
     Animated,
-    ScrollView
+    ScrollView,
+    Easing
 } from 'react-native';
 import Header from '../../components/Header';
 import { useNavigation } from '@react-navigation/native';
@@ -91,80 +92,105 @@ const ShoeImage = ({ source }) => {
 };
 
 const ShoeCard = ({ zapatilla, onPress, style }) => {
-    const scaleAnim = new Animated.Value(1);
-    const rotateAnim = new Animated.Value(0);
+    const [isHovered, setIsHovered] = useState(false);
+    const translateY = useState(new Animated.Value(0))[0];
+    const translateX = useState(new Animated.Value(0))[0];
+    const rotate = useState(new Animated.Value(0))[0];
+    const cardTranslateY = useState(new Animated.Value(0))[0];
 
-    const handleHoverIn = () => {
+    const startAnimation = () => {
+        setIsHovered(true);
         Animated.parallel([
-            Animated.spring(scaleAnim, {
-                toValue: 1.08,
-                friction: 5,
-                tension: 40,
+            Animated.spring(translateY, {
+                toValue: -15,
                 useNativeDriver: true,
+                friction: 7,
+                tension: 40
             }),
-            Animated.sequence([
-                Animated.timing(rotateAnim, {
-                    toValue: -0.03,
-                    duration: 150,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(rotateAnim, {
-                    toValue: 0.03,
-                    duration: 150,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(rotateAnim, {
-                    toValue: 0,
-                    duration: 150,
-                    useNativeDriver: true,
-                }),
-            ])
+            Animated.spring(translateX, {
+                toValue: 10,
+                useNativeDriver: true,
+                friction: 7,
+                tension: 40
+            }),
+            Animated.spring(rotate, {
+                toValue: 1,
+                useNativeDriver: true,
+                friction: 7,
+                tension: 40
+            }),
+            Animated.spring(cardTranslateY, {
+                toValue: -10,
+                useNativeDriver: true,
+                friction: 6,
+                tension: 30
+            })
         ]).start();
     };
 
-    const handleHoverOut = () => {
+    const endAnimation = () => {
+        setIsHovered(false);
         Animated.parallel([
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 5,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-            Animated.timing(rotateAnim, {
+            Animated.spring(translateY, {
                 toValue: 0,
-                duration: 200,
                 useNativeDriver: true,
+                friction: 7,
+                tension: 40
+            }),
+            Animated.spring(translateX, {
+                toValue: 0,
+                useNativeDriver: true,
+                friction: 7,
+                tension: 40
+            }),
+            Animated.spring(rotate, {
+                toValue: 0,
+                useNativeDriver: true,
+                friction: 7,
+                tension: 40
+            }),
+            Animated.spring(cardTranslateY, {
+                toValue: 0,
+                useNativeDriver: true,
+                friction: 6,
+                tension: 30
             })
         ]).start();
     };
 
     return (
-        <TouchableOpacity
+        <Pressable
             onPress={onPress}
-            onHoverIn={handleHoverIn}
-            onHoverOut={handleHoverOut}
             style={[styles.cardContainer, style]}
-            activeOpacity={1}
+            onMouseEnter={startAnimation}
+            onMouseLeave={endAnimation}
         >
             <Animated.View 
                 style={[
                     styles.card,
                     {
-                        transform: [
-                            { scale: scaleAnim },
-                            { rotate: rotateAnim.interpolate({
-                                inputRange: [-1, 1],
-                                outputRange: ['-10deg', '10deg']
-                            })},
-                            { perspective: 1000 }
-                        ]
+                        transform: [{ translateY: cardTranslateY }]
                     }
                 ]}
             >
                 <View style={styles.imageWrapper}>
-                    <Image
+                    <Animated.Image
                         source={zapatilla.imagen}
-                        style={styles.shoeImage}
+                        style={[
+                            styles.shoeImage,
+                            {
+                                transform: [
+                                    { translateY },
+                                    { translateX },
+                                    {
+                                        rotate: rotate.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: ['0deg', '5deg']
+                                        })
+                                    }
+                                ]
+                            }
+                        ]}
                         resizeMode="contain"
                     />
                 </View>
@@ -177,13 +203,26 @@ const ShoeCard = ({ zapatilla, onPress, style }) => {
                     </Text>
                 </View>
             </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
     );
 };
 
 const Home = () => {
     const navigation = useNavigation();
     const [containerWidth, setContainerWidth] = useState(width);
+    const [zapatillasFiltradas, setZapatillasFiltradas] = useState(zapatillas);
+
+    const handleSearch = (query) => {
+        if (!query.trim()) {
+            setZapatillasFiltradas(zapatillas);
+            return;
+        }
+
+        const filtradas = zapatillas.filter(zapatilla => 
+            zapatilla.nombre.toLowerCase().includes(query.toLowerCase())
+        );
+        setZapatillasFiltradas(filtradas);
+    };
 
     const onLayout = (event) => {
         const { width: newWidth } = event.nativeEvent.layout;
@@ -204,13 +243,13 @@ const Home = () => {
 
     return (
         <View style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
-            <Header />
+            <Header onSearch={handleSearch} />
             <ScrollView>
                 <View 
                     style={styles.gridContainer}
                     onLayout={onLayout}
                 >
-                    {zapatillas.map((zapatilla) => (
+                    {zapatillasFiltradas.map((zapatilla) => (
                         <ShoeCard
                             key={zapatilla.id}
                             zapatilla={zapatilla}
@@ -233,38 +272,48 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
     },
     cardContainer: {
+        width: '100%',
+        padding: 8,
         marginBottom: 16,
     },
     card: {
-        width: '100%',
         backgroundColor: 'white',
         borderRadius: 12,
-        overflow: 'hidden',
+        padding: 15,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
-            height: 4,
+            height: 2,
         },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
+        shadowOpacity: 0.15,
+        shadowRadius: 3.84,
         elevation: 5,
     },
     imageWrapper: {
         width: '100%',
         aspectRatio: 1,
-        padding: 16,
-        backgroundColor: 'white',
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden',
+        marginBottom: 10,
+    },
+    orangeOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#FF8C00',
+        opacity: 0.2,
+        zIndex: 1
     },
     shoeImage: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'contain',
+        width: '80%',
+        height: '80%',
+        zIndex: 2
     },
     cardContent: {
-        padding: 12,
-        backgroundColor: 'white',
+        paddingHorizontal: 5,
     },
     shoeName: {
         fontSize: 12,
