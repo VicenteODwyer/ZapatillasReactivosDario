@@ -2,6 +2,8 @@ import { View, Text, Image, Pressable, Modal } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Header from '../../components/Header';
+import { Ionicons } from '@expo/vector-icons';
 
 const Compra = () => {
   const route = useRoute();
@@ -11,6 +13,7 @@ const Compra = () => {
   const [cantidad, setCantidad] = useState(1);
   const [talleSeleccionado, setTalleSeleccionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [showError, setShowError] = useState(false);
   
   if (!zapatilla) {
     return (
@@ -25,6 +28,7 @@ const Compra = () => {
 
   const handleAgregarCarrito = async () => {
     if (!talleSeleccionado) {
+      setShowError(true);
       return;
     }
 
@@ -66,8 +70,10 @@ const Compra = () => {
   };
 
   return (
-    <View style={{ 
-      flex: 1, 
+    <View>
+      <Header />
+      <View style={{ 
+        flex: 1, 
       backgroundColor: '#fff',
       padding: 20
     }}>
@@ -378,6 +384,60 @@ const Compra = () => {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showError}
+        onRequestClose={() => setShowError(false)}
+      >
+        <View style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        }}>
+          <View style={{
+            backgroundColor: 'white',
+            padding: 20,
+            borderRadius: 15,
+            width: '80%',
+            maxWidth: 400,
+            alignItems: 'center',
+            gap: 20
+          }}>
+            <Ionicons name="alert-circle" size={50} color="#ff4d4d" />
+            
+            <Text style={{ 
+              fontSize: 18, 
+              fontWeight: '500',
+              textAlign: 'center'
+            }}>
+              Por favor, selecciona un talle antes de agregar al carrito
+            </Text>
+
+            <Pressable
+              onPress={() => setShowError(false)}
+              style={{
+                backgroundColor: '#ff4d4d',
+                padding: 15,
+                borderRadius: 10,
+                width: '100%',
+                alignItems: 'center'
+              }}
+            >
+              <Text style={{ 
+                color: 'white', 
+                fontWeight: '600',
+                fontSize: 16
+              }}>
+                Entendido
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    </View>
     </View>
   );
 };
