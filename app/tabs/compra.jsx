@@ -26,6 +26,18 @@ const Compra = () => {
     if (!talleSeleccionado) {
       return;
     }
+
+    const productoParaCarrito = {
+      id: zapatilla.id,
+      nombre: zapatilla.nombre,
+      precio: zapatilla.precio,
+      imagen: zapatilla.imagen,
+      talle: talleSeleccionado,
+      cantidad: cantidad,
+      color: "Por definir"
+    };
+
+    
     setModalVisible(true);
   };
 
