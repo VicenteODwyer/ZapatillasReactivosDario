@@ -1,51 +1,56 @@
 import { View, Text, Image, Pressable, TextInput } from 'react-native';
-import { useState, useEffect } from 'react';
-import { useRoute } from '@react-navigation/native';
+import { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import Header from '../../components/Header';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Carrito = () => {
-  const route = useRoute();
   const [productos, setProductos] = useState([]);
   const [codigoPostal, setCodigoPostal] = useState('');
 
-  // Efecto para manejar nuevos productos agregados
-  useEffect(() => {
-    if (route.params?.nuevoProducto) {
-      const nuevoProducto = route.params.nuevoProducto;
-      
-      setProductos(productosActuales => {
-        // Verificar si el producto ya existe con el mismo talle
-        const productoExistente = productosActuales.find(
-          p => p.id === nuevoProducto.id && p.talle === nuevoProducto.talle
-        );
-
-        if (productoExistente) {
-          // Actualizar cantidad si el producto ya existe
-          return productosActuales.map(p => 
-            p.id === nuevoProducto.id && p.talle === nuevoProducto.talle
-              ? { ...p, cantidad: p.cantidad + nuevoProducto.cantidad }
-              : p
-          );
-        } else {
-          // Agregar nuevo producto si no existe
-          return [...productosActuales, nuevoProducto];
+  // Reemplazar useEffect por useFocusEffect
+  useFocusEffect(
+    useCallback(() => {
+      const cargarProductos = async () => {
+        try {
+          const carritoGuardado = await AsyncStorage.getItem('carrito');
+          if (carritoGuardado) {
+            setProductos(JSON.parse(carritoGuardado));
+          }
+        } catch (error) {
+          console.error('Error al cargar el carrito:', error);
         }
-      });
+      };
+
+      cargarProductos();
+    }, [])
+  );
+
+  // Actualizar AsyncStorage cuando cambian los productos
+  const actualizarCarrito = async (nuevosProductos) => {
+    try {
+      await AsyncStorage.setItem('carrito', JSON.stringify(nuevosProductos));
+      setProductos(nuevosProductos);
+    } catch (error) {
+      console.error('Error al actualizar el carrito:', error);
     }
-  }, [route.params?.nuevoProducto]);
+  };
+
+  const handleEliminarProducto = async (id) => {
+    const nuevosProductos = productos.filter(producto => producto.id !== id);
+    await actualizarCarrito(nuevosProductos);
+  };
+
+  const handleCantidadChange = async (id, nuevaCantidad) => {
+    const nuevosProductos = productos.map(producto => 
+      producto.id === id ? {...producto, cantidad: nuevaCantidad} : producto
+    );
+    await actualizarCarrito(nuevosProductos);
+  };
 
   const calcularSubtotal = () => {
     return productos.reduce((total, producto) => total + (producto.precio * producto.cantidad), 0);
-  };
-
-  const handleEliminarProducto = (id) => {
-    setProductos(productos.filter(producto => producto.id !== id));
-  };
-
-  const handleCantidadChange = (id, nuevaCantidad) => {
-    setProductos(productos.map(producto => 
-      producto.id === id ? {...producto, cantidad: nuevaCantidad} : producto
-    ));
   };
 
   return (

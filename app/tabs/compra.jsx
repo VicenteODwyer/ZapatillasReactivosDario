@@ -1,6 +1,7 @@
 import { View, Text, Image, Pressable, Modal } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Compra = () => {
   const route = useRoute();
@@ -22,13 +23,13 @@ const Compra = () => {
   const talles = [40, 41, 42, 43, 44];
   const precioConDescuento = zapatilla.precio * 0.9;
 
-  const handleAgregarCarrito = () => {
+  const handleAgregarCarrito = async () => {
     if (!talleSeleccionado) {
       return;
     }
 
     const productoParaCarrito = {
-      id: zapatilla.id,
+      id: `${zapatilla.id}-${talleSeleccionado}`,
       nombre: zapatilla.nombre,
       precio: zapatilla.precio,
       imagen: zapatilla.imagen,
@@ -37,8 +38,31 @@ const Compra = () => {
       color: "Por definir"
     };
 
-    
-    setModalVisible(true);
+    try {
+      // Obtener carrito actual
+      const carritoActual = await AsyncStorage.getItem('carrito');
+      let productos = carritoActual ? JSON.parse(carritoActual) : [];
+      
+      // Verificar si el producto ya existe con el mismo talle
+      const productoExistente = productos.findIndex(
+        p => p.id === productoParaCarrito.id
+      );
+
+      if (productoExistente !== -1) {
+        // Actualizar cantidad si existe
+        productos[productoExistente].cantidad += cantidad;
+      } else {
+        // Agregar nuevo producto si no existe
+        productos.push(productoParaCarrito);
+      }
+      
+      // Guardar carrito actualizado
+      await AsyncStorage.setItem('carrito', JSON.stringify(productos));
+      
+      setModalVisible(true);
+    } catch (error) {
+      console.error('Error al guardar en el carrito:', error);
+    }
   };
 
   return (
