@@ -1,4 +1,14 @@
-import { View, Text, Image, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { 
+    View, 
+    Text, 
+    Image, 
+    StyleSheet, 
+    Dimensions,
+    TouchableOpacity,
+    Animated,
+    ScrollView
+} from 'react-native';
 import Header from '../../components/Header';
 import { useNavigation } from '@react-navigation/native';
 
@@ -66,124 +76,207 @@ const zapatillas = [
 
 ];
 
+const { width } = Dimensions.get('window');
+
+const ShoeImage = ({ source }) => {
+    return (
+        <View style={styles.imageContainer}>
+            <Image
+                source={source}
+                style={styles.shoeImage}
+                resizeMode="contain"
+            />
+        </View>
+    );
+};
+
+const ShoeCard = ({ zapatilla, onPress, style }) => {
+    const scaleAnim = new Animated.Value(1);
+    const rotateAnim = new Animated.Value(0);
+
+    const handleHoverIn = () => {
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 1.08,
+                friction: 5,
+                tension: 40,
+                useNativeDriver: true,
+            }),
+            Animated.sequence([
+                Animated.timing(rotateAnim, {
+                    toValue: -0.03,
+                    duration: 150,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(rotateAnim, {
+                    toValue: 0.03,
+                    duration: 150,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(rotateAnim, {
+                    toValue: 0,
+                    duration: 150,
+                    useNativeDriver: true,
+                }),
+            ])
+        ]).start();
+    };
+
+    const handleHoverOut = () => {
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                friction: 5,
+                tension: 40,
+                useNativeDriver: true,
+            }),
+            Animated.timing(rotateAnim, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+            })
+        ]).start();
+    };
+
+    return (
+        <TouchableOpacity
+            onPress={onPress}
+            onHoverIn={handleHoverIn}
+            onHoverOut={handleHoverOut}
+            style={[styles.cardContainer, style]}
+            activeOpacity={1}
+        >
+            <Animated.View 
+                style={[
+                    styles.card,
+                    {
+                        transform: [
+                            { scale: scaleAnim },
+                            { rotate: rotateAnim.interpolate({
+                                inputRange: [-1, 1],
+                                outputRange: ['-10deg', '10deg']
+                            })},
+                            { perspective: 1000 }
+                        ]
+                    }
+                ]}
+            >
+                <View style={styles.imageWrapper}>
+                    <Image
+                        source={zapatilla.imagen}
+                        style={styles.shoeImage}
+                        resizeMode="contain"
+                    />
+                </View>
+                <View style={styles.cardContent}>
+                    <Text numberOfLines={1} style={styles.shoeName}>
+                        {zapatilla.nombre}
+                    </Text>
+                    <Text style={styles.shoePrice}>
+                        ${zapatilla.precio.toLocaleString()}
+                    </Text>
+                </View>
+            </Animated.View>
+        </TouchableOpacity>
+    );
+};
+
 const Home = () => {
-  const navigation = useNavigation();
+    const navigation = useNavigation();
+    const [containerWidth, setContainerWidth] = useState(width);
 
-  const handleCompra = (zapatilla) => {
-    try {
-      if (zapatilla && zapatilla.id) {
-        navigation.navigate('compra', { zapatilla: {
-          id: zapatilla.id,
-          nombre: zapatilla.nombre,
-          precio: zapatilla.precio,
-          imagen: zapatilla.imagen
-        }});
-      } else {
-        console.error("Datos de zapatilla inválidos");
-      }
-    } catch (error) {
-      console.error("Error al navegar:", error);
-    }
-  };
+    const onLayout = (event) => {
+        const { width: newWidth } = event.nativeEvent.layout;
+        setContainerWidth(newWidth);
+    };
 
-  return (
-    <View style={{ 
-      flex: 1,
-      backgroundColor: '#f8f8f8',
-    }}>
-      <Header />
-      <View style={{ 
-        flex: 1,
-        padding: 20,
+    const cardWidth = (containerWidth - 48) / 3;
+
+    const handleCompra = (zapatilla) => {
+        try {
+            if (zapatilla && zapatilla.id) {
+                navigation.navigate('compra', { zapatilla });
+            }
+        } catch (error) {
+            console.error("Error al navegar:", error);
+        }
+    };
+
+    return (
+        <View style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
+            <Header />
+            <ScrollView>
+                <View 
+                    style={styles.gridContainer}
+                    onLayout={onLayout}
+                >
+                    {zapatillas.map((zapatilla) => (
+                        <ShoeCard
+                            key={zapatilla.id}
+                            zapatilla={zapatilla}
+                            style={{ width: cardWidth }}
+                            onPress={() => handleCompra(zapatilla)}
+                        />
+                    ))}
+                </View>
+            </ScrollView>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    gridContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        padding: 16,
+        gap: 8,
+        backgroundColor: '#f8f8f8',
+    },
+    cardContainer: {
+        marginBottom: 16,
+    },
+    card: {
+        width: '100%',
+        backgroundColor: 'white',
+        borderRadius: 12,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    imageWrapper: {
+        width: '100%',
+        aspectRatio: 1,
+        padding: 16,
+        backgroundColor: 'white',
         alignItems: 'center',
         justifyContent: 'center',
-      }}>
-        <View style={{ 
-          display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
-          gap: 25,
-          padding: 20,
-          maxWidth: 1400,
-          width: '100%',
-          margin: '30px auto',
-          borderRadius: 30,
-          alignSelf: 'center',
-        }}>
-          {zapatillas.map((zapatilla) => (
-            <View 
-              key={zapatilla.id} 
-              style={{
-                backgroundColor: 'white',
-                borderRadius: 20,
-                padding: 15,
-                height: 400,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                position: 'relative',
-                shadowColor: "#000",
-                shadowOffset: {
-                  width: 0,
-                  height: 10,
-                },
-                shadowOpacity: 0.08,
-                shadowRadius: 20,
-                elevation: 8,
-              }}
-            >
-              <Image 
-                source={zapatilla.imagen}
-                style={{ 
-                  width: '100%', 
-                  height: 180,
-                  objectFit: 'contain',
-                  marginBottom: 10,
-                  transform: [{scale: 1}],
-                }}
-              />
-              <Text style={{ 
-                fontSize: 20,
-                color: '#333',
-                fontWeight: '600',
-                marginBottom: 5,
-                lineHeight: 24,
-              }}>{zapatilla.nombre}</Text>
-              <Text style={{ 
-                fontSize: 20,
-                color: '#333',
-                fontWeight: '600',
-                marginBottom: 12
-              }}>${zapatilla.precio}</Text>
-              <Pressable 
-                onPress={() => handleCompra(zapatilla)}
-                android_ripple={{ color: '#ff6666' }}
-                style={({ pressed }) => [{ 
-                  position: 'absolute',
-                  bottom: 15,
-                  left: 15,
-                  right: 15,
-                  backgroundColor: pressed ? '#ff6666' : '#ff4d4d',
-                  padding: 9,
-                  borderRadius: 12,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                }]}
-              >
-                <Text style={{ 
-                  color: 'white', 
-                  fontSize: 16,
-                  fontWeight: '500'
-                }}>Comprar</Text>
-              </Pressable>
-            </View>
-          ))}
-        </View>
-      </View>
-    </View>
-  );
-};
+    },
+    shoeImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain',
+    },
+    cardContent: {
+        padding: 12,
+        backgroundColor: 'white',
+    },
+    shoeName: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 4,
+    },
+    shoePrice: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#000',
+    }
+});
 
 export default Home;
