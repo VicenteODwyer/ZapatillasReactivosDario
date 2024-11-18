@@ -47,7 +47,10 @@ const Header = () => {
         </View>
 
         <View style={styles.iconContainer}>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => handleNavigation('carrito')}
+          >
             <Ionicons name="cart-outline" size={44} color="black" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
@@ -76,7 +79,7 @@ const Header = () => {
                 styles.menuItem,
                 hovered && styles.menuItemHovered
               ]}
-              onPress={() => handleNavigation('home')}
+              onPress={() => handleNavigation('index')}
             >
               <Ionicons name="home-outline" size={24} color="#555" />
               <Text style={styles.menuText}>Inicio</Text>
@@ -89,7 +92,7 @@ const Header = () => {
                 styles.menuItem,
                 hovered && styles.menuItemHovered
               ]}
-              onPress={() => handleNavigation('index')}
+              onPress={() => handleNavigation('login')}
             >
               <Ionicons name="log-in-outline" size={24} color="#555" />
               <Text style={styles.menuText}>Login</Text>
