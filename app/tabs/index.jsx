@@ -1,109 +1,189 @@
-import { StyleSheet } from 'react-native';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, Image, Pressable } from 'react-native';
 import Header from '../../components/Header';
+import { useNavigation } from '@react-navigation/native';
 
+const zapatillas = [
+  {
+    id: 1,
+    nombre: "Adidas Superstar x Korn",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa1.webp')
+  },
+  {
+    id: 2,
+    nombre: "Nike Dunk High JBalvin",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa2.webp')
+  },
+  {
+    id: 3,
+    nombre: "Nike Dunk High JBalvin",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa3.webp')
+  },
+  {
+    id: 4,
+    nombre: "Nike TN Red",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa4.webp')
+  },
+  {
+    id: 5,
+    nombre: "Nike Air Max 720",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa5.webp')
+  },
+  {
+    id: 6,
+    nombre: "Adidas Alphaedge",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa6.webp')
+  },
+  {
+    id: 7,
+    nombre: "Nike Mag BTTF",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa7.webp')
+  },
+  {
+    id: 8,
+    nombre: "Adidas Campus 00s Green",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa8.webp')
+  },
+  {
+    id: 9,
+    nombre: "Adidas Campus 00s Gray",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa9.webp')
+  },
+  {
+    id: 10,
+    nombre: "Adidas Predator 24 Pro",
+    precio: 159999,
+    imagen: require('../../assets/zapas/zapa10.webp')
+  },
 
-export default function HomeScreen() {
+];
+
+const Home = () => {
+  const navigation = useNavigation();
+
+  const handleCompra = (zapatilla) => {
+    try {
+      if (zapatilla && zapatilla.id) {
+        navigation.navigate('compra', { zapatilla: {
+          id: zapatilla.id,
+          nombre: zapatilla.nombre,
+          precio: zapatilla.precio,
+          imagen: zapatilla.imagen
+        }});
+      } else {
+        console.error("Datos de zapatilla inválidos");
+      }
+    } catch (error) {
+      console.error("Error al navegar:", error);
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={{ 
+      flex: 1,
+      backgroundColor: '#f8f8f8',
+    }}>
       <Header />
-      <View style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.title}>INICIAR SESIÓN</Text>
-          
-          <Text style={styles.label}>Correo electrónico</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingrese su correo electrónico"
-          />
-          
-          <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingrese su contraseña"
-            secureTextEntry
-          />
-
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Iniciar Sesión</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity>
-            <Text style={styles.forgotPassword}>¿OLVIDASTE TU CONTRASEÑA?</Text>
-          </TouchableOpacity>
+      <View style={{ 
+        flex: 1,
+        padding: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <View style={{ 
+          display: 'grid',
+          gridTemplateColumns: 'repeat(5, 1fr)',
+          gap: 25,
+          padding: 20,
+          maxWidth: 1400,
+          width: '100%',
+          margin: '30px auto',
+          borderRadius: 30,
+          alignSelf: 'center',
+        }}>
+          {zapatillas.map((zapatilla) => (
+            <View 
+              key={zapatilla.id} 
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 20,
+                padding: 15,
+                height: 400,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                position: 'relative',
+                shadowColor: "#000",
+                shadowOffset: {
+                  width: 0,
+                  height: 10,
+                },
+                shadowOpacity: 0.08,
+                shadowRadius: 20,
+                elevation: 8,
+              }}
+            >
+              <Image 
+                source={zapatilla.imagen}
+                style={{ 
+                  width: '100%', 
+                  height: 180,
+                  objectFit: 'contain',
+                  marginBottom: 10,
+                  transform: [{scale: 1}],
+                }}
+              />
+              <Text style={{ 
+                fontSize: 20,
+                color: '#333',
+                fontWeight: '600',
+                marginBottom: 5,
+                lineHeight: 24,
+              }}>{zapatilla.nombre}</Text>
+              <Text style={{ 
+                fontSize: 20,
+                color: '#333',
+                fontWeight: '600',
+                marginBottom: 12
+              }}>${zapatilla.precio}</Text>
+              <Pressable 
+                onPress={() => handleCompra(zapatilla)}
+                android_ripple={{ color: '#ff6666' }}
+                style={({ pressed }) => [{ 
+                  position: 'absolute',
+                  bottom: 15,
+                  left: 15,
+                  right: 15,
+                  backgroundColor: pressed ? '#ff6666' : '#ff4d4d',
+                  padding: 9,
+                  borderRadius: 12,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                }]}
+              >
+                <Text style={{ 
+                  color: 'white', 
+                  fontSize: 16,
+                  fontWeight: '500'
+                }}>Comprar</Text>
+              </Pressable>
+            </View>
+          ))}
         </View>
       </View>
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 35,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 10,
-    width: '90%',
-    maxWidth: 500,
-    aspectRatio: 1.2,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#000',
-  },
-  input: {
-    width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 15,
-    marginBottom: 20,
-    fontSize: 16,
-    justifyContent: 'center',
-  },
-  button: {
-    backgroundColor: '#000',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  forgotPassword: {
-    color: '#000',
-    textAlign: 'center',
-    fontSize: 14,
-    textDecorationLine: 'underline',
-  },
-});
+export default Home;

@@ -4,6 +4,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Header from './components/Header';
 import HomeScreen from './app/tabs/index';
 import RegisterScreen from './app/tabs/register';
+import CompraScreen from './app/tabs/compra';
+import CarritoScreen from './app/tabs/carrito';
 
 const Stack = createStackNavigator();
 
@@ -13,17 +15,36 @@ function App() {
       <Stack.Navigator
         initialRouteName="Home"
         screenOptions={{
-          header: () => <Header />,
           headerShown: false,
         }}
       >
         <Stack.Screen 
           name="Home" 
-          component={HomeScreen} 
+          component={HomeScreen}
+          options={{
+            header: () => <Header />
+          }}
         />
         <Stack.Screen 
           name="Register" 
-          component={RegisterScreen} 
+          component={RegisterScreen}
+          options={{
+            header: () => <Header />
+          }}
+        />
+        <Stack.Screen 
+          name="Compra" 
+          component={CompraScreen}
+          options={{
+            header: () => <Header />
+          }}
+        />
+        <Stack.Screen 
+          name="Carrito" 
+          component={CarritoScreen}
+          options={{
+            header: () => <Header />
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
