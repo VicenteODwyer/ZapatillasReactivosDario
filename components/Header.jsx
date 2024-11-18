@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -23,9 +23,16 @@ const Header = () => {
       >
         <TouchableOpacity 
           style={styles.menuButton}
-          onPress={() => setMenuVisible(true)}
+          onPress={(e) => {
+            e.preventDefault();
+            setMenuVisible(!menuVisible);
+          }}
         >
-          <Ionicons name="menu" size={44} color="black" />
+          <Ionicons 
+            name={menuVisible ? "close" : "menu"} 
+            size={44} 
+            color="black" 
+          />
         </TouchableOpacity>
 
         <View style={styles.searchContainer}>
@@ -55,34 +62,53 @@ const Header = () => {
         visible={menuVisible}
         onRequestClose={() => setMenuVisible(false)}
       >
-        <View style={styles.modalOverlayContainer}>
-          <View style={styles.transparentHeader} />
-          <TouchableOpacity 
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={() => setMenuVisible(false)}
-          >
-            <View style={styles.menuContainer} onStartShouldSetResponder={(event) => true}>
-              <TouchableOpacity 
-                style={styles.menuItem}
-                onPress={() => handleNavigation('index')}
-              >
-                <Ionicons name="log-in-outline" size={24} color="#555" />
-                <Text style={styles.menuText}>Login</Text>
-              </TouchableOpacity>
-              
-              <View style={styles.separator} />
-              
-              <TouchableOpacity 
-                style={styles.menuItem}
-                onPress={() => handleNavigation('register')}
-              >
-                <Ionicons name="person-add-outline" size={24} color="#555" />
-                <Text style={styles.menuText}>Registro</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity 
+          style={styles.modalOverlayContainer}
+          activeOpacity={1}
+          onPress={() => setMenuVisible(false)}
+        >
+          <View style={styles.menuContainer} onStartShouldSetResponder={(event) => {
+            event.stopPropagation();
+            return true;
+          }}>
+            <Pressable 
+              style={({ hovered }) => [
+                styles.menuItem,
+                hovered && styles.menuItemHovered
+              ]}
+              onPress={() => handleNavigation('home')}
+            >
+              <Ionicons name="home-outline" size={24} color="#555" />
+              <Text style={styles.menuText}>Inicio</Text>
+            </Pressable>
+
+            <View style={styles.separator} />
+            
+            <Pressable 
+              style={({ hovered }) => [
+                styles.menuItem,
+                hovered && styles.menuItemHovered
+              ]}
+              onPress={() => handleNavigation('index')}
+            >
+              <Ionicons name="log-in-outline" size={24} color="#555" />
+              <Text style={styles.menuText}>Login</Text>
+            </Pressable>
+            
+            <View style={styles.separator} />
+            
+            <Pressable 
+              style={({ hovered }) => [
+                styles.menuItem,
+                hovered && styles.menuItemHovered
+              ]}
+              onPress={() => handleNavigation('register')}
+            >
+              <Ionicons name="person-add-outline" size={24} color="#555" />
+              <Text style={styles.menuText}>Registro</Text>
+            </Pressable>
+          </View>
+        </TouchableOpacity>
       </Modal>
     </>
   );
@@ -133,18 +159,11 @@ const styles = StyleSheet.create({
   },
   modalOverlayContainer: {
     flex: 1,
-  },
-  transparentHeader: {
-    height: 120,
-    backgroundColor: 'transparent',
-  },
-  modalOverlay: {
-    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   menuContainer: {
     position: 'absolute',
-    top: 1,
+    top: 120,
     left: 0,
     backgroundColor: 'white',
     width: 380,
@@ -180,6 +199,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     marginVertical: 10,
     marginHorizontal: 6,
+  },
+  menuItemHovered: {
+    backgroundColor: '#e9ecef',
+    transform: [{scale: 1.02}],
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 3.84,
+    elevation: 3,
   },
 });
 
