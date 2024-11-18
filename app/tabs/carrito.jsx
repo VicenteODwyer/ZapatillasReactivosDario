@@ -1,10 +1,12 @@
-import { View, Text, Image, Pressable, TextInput } from 'react-native';
+import { View, Text, Image, Pressable, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import Header from '../../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { StyleSheet } from 'react-native';
 
 const Carrito = () => {
   const navigation = useNavigation();
@@ -56,262 +58,334 @@ const Carrito = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
-      <Header />
-      <View style={{ 
-        flex: 1,
-        padding: 20,
-        maxWidth: 1200,
-        width: '100%',
-        marginHorizontal: 'auto',
-      }}>
-        {productos.length === 0 ? (
-          <Text style={{ 
-            fontSize: 18, 
-            textAlign: 'center', 
-            marginTop: 20 
-          }}>
-            No hay productos en el carrito
-          </Text>
-        ) : (
-          <View style={{ flexDirection: 'row', gap: 40 }}>
-            {/* Columna izquierda - Lista de productos */}
-            <View style={{ flex: 2 }}>
-              <Text style={{ 
-                fontSize: 24, 
-                fontWeight: '600',
-                marginBottom: 20 
-              }}>
-                Mi Carrito ({productos.length} productos)
-              </Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color="#000" style={styles.backIcon} />
+        </TouchableOpacity>
+        <View style={styles.progressBar}>
+          <View style={styles.step}>
+            <View style={styles.stepIconActive}>
+              <Icon name="shopping-cart" size={20} color="#000" />
+            </View>
+            <Text style={styles.stepTextActive}>Carrito</Text>
+          </View>
+          <View style={styles.progressLine} />
+          <View style={styles.step}>
+            <View style={styles.stepIconInactive}>
+              <Icon name="credit-card" size={20} color="#999" />
+            </View>
+            <Text style={styles.stepTextInactive}>Pago</Text>
+          </View>
+        </View>
+      </View>
 
-              {/* Lista de productos */}
-              <View style={{ gap: 15 }}>
-                {productos.map((producto) => (
-                  <View key={producto.id} style={{
-                    backgroundColor: 'white',
-                    borderRadius: 15,
-                    padding: 20,
-                    flexDirection: 'row',
-                    gap: 20,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 10,
-                  }}>
-                    {/* Imagen del producto */}
-                    <Image 
-                      source={producto.imagen}
-                      style={{ 
-                        width: 120,
-                        height: 120,
-                        objectFit: 'contain',
-                        borderRadius: 10
-                      }}
-                    />
+      <ScrollView style={styles.content}>
+        <Text style={styles.cartTitle}>
+          Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
+        </Text>
 
-                    {/* Detalles del producto */}
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ 
-                        fontSize: 18,
-                        fontWeight: '600',
-                        marginBottom: 5
-                      }}>
-                        {producto.nombre}
-                      </Text>
-                      <Text style={{ 
-                        color: '#666',
-                        marginBottom: 5 
-                      }}>
-                        Talla: {producto.talle}
-                      </Text>
-                      <Text style={{ 
-                        color: '#666',
-                        marginBottom: 10 
-                      }}>
-                        Color: {producto.color}
-                      </Text>
-
-                      {/* Controles de cantidad */}
-                      <View style={{ 
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 15
-                      }}>
-                        <Pressable
-                          onPress={() => handleCantidadChange(producto.id, Math.max(1, producto.cantidad - 1))}
-                          style={{ 
-                            width: 30,
-                            height: 30,
-                            borderRadius: 15,
-                            backgroundColor: '#f0f0f0',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <Text>-</Text>
-                        </Pressable>
-                        <Text>{producto.cantidad}</Text>
-                        <Pressable
-                          onPress={() => handleCantidadChange(producto.id, producto.cantidad + 1)}
-                          style={{ 
-                            width: 30,
-                            height: 30,
-                            borderRadius: 15,
-                            backgroundColor: '#f0f0f0',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <Text>+</Text>
-                        </Pressable>
-                      </View>
-                    </View>
-
-                    {/* Precio y botón eliminar */}
-                    <View style={{ 
-                      alignItems: 'flex-end',
-                      gap: 10
-                    }}>
-                      <Text style={{ 
-                        fontSize: 20,
-                        fontWeight: '600'
-                      }}>
-                        ${producto.precio.toLocaleString()}
-                      </Text>
-                      <Pressable
-                        onPress={() => handleEliminarProducto(producto.id)}
-                        style={{ 
-                          padding: 8,
-                          borderRadius: 8,
-                          backgroundColor: '#fff0f0'
-                        }}
-                      >
-                        <Text style={{ color: '#ff4d4d' }}>🗑 Eliminar</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                ))}
+        {productos.map((producto) => (
+          <View key={producto.id} style={styles.productCard}>
+            <Image source={producto.imagen} style={styles.productImage} />
+            <View style={styles.productDetails}>
+              <Text style={styles.productTitle}>{producto.nombre}</Text>
+              <Text style={styles.productSpec}>Talla: {producto.talle}</Text>
+              <Text style={styles.productSpec}>Color: {producto.color}</Text>
+              <View style={styles.quantityControls}>
+                <TouchableOpacity style={styles.quantityButton}>
+                  <Text style={styles.quantityButtonText}>−</Text>
+                </TouchableOpacity>
+                <Text style={styles.quantity}>{producto.cantidad}</Text>
+                <TouchableOpacity style={styles.quantityButton}>
+                  <Text style={styles.quantityButtonText}>+</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => handleEliminarProducto(producto.id)}
+                  style={styles.deleteButton}
+                >
+                  <Icon name="delete-outline" size={16} color="#ff0000" />
+                  <Text style={styles.deleteText}>Eliminar</Text>
+                </TouchableOpacity>
               </View>
             </View>
+            <Text style={styles.price}>${producto.precio.toLocaleString()}</Text>
+          </View>
+        ))}
 
-            {/* Columna derecha - Resumen */}
-            <View style={{ 
-              flex: 1,
-              backgroundColor: 'white',
-              borderRadius: 15,
-              padding: 20,
-              height: 'fit-content',
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 10,
-            }}>
-              <Text style={{ 
-                fontSize: 24,
-                fontWeight: '600',
-                marginBottom: 20
-              }}>
-                Resumen de Compra
-              </Text>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryTitle}>Resumen de Compra</Text>
+          
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Subtotal</Text>
+            <Text style={styles.summaryValue}>${calcularSubtotal().toLocaleString()}</Text>
+          </View>
+          
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Envío</Text>
+            <Text style={styles.freeShipping}>¡Gratis! 🎁</Text>
+          </View>
+          
+          <View style={[styles.summaryRow, styles.totalRow]}>
+            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalValue}>${calcularSubtotal().toLocaleString()}</Text>
+          </View>
 
-              <View style={{ 
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginBottom: 10
-              }}>
-                <Text style={{ color: '#666' }}>Subtotal</Text>
-                <Text style={{ fontWeight: '600' }}>${calcularSubtotal().toLocaleString()}</Text>
-              </View>
-
-              <View style={{ 
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginBottom: 20
-              }}>
-                <Text style={{ color: '#666' }}>Envío</Text>
-                <Text style={{ 
-                  color: '#00b300',
-                  fontWeight: '600'
-                }}>
-                  ¡Gratis! 🚚
-                </Text>
-              </View>
-
-              <View style={{ 
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginBottom: 30,
-                paddingTop: 20,
-                borderTopWidth: 1,
-                borderTopColor: '#eee'
-              }}>
-                <Text style={{ fontSize: 18, fontWeight: '600' }}>Total</Text>
-                <Text style={{ fontSize: 18, fontWeight: '700' }}>
-                  ${calcularSubtotal().toLocaleString()}
-                </Text>
-              </View>
-
-              {/* Calculador de envío */}
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ 
-                  fontWeight: '600',
-                  marginBottom: 10
-                }}>
-                  📍 Calcular tiempo de envío
-                </Text>
-                <View style={{ 
-                  flexDirection: 'row',
-                  gap: 10
-                }}>
-                  <TextInput
-                    placeholder="Ingresa tu código postal"
-                    value={codigoPostal}
-                    onChangeText={setCodigoPostal}
-                    style={{
-                      flex: 1,
-                      borderWidth: 1,
-                      borderColor: '#eee',
-                      borderRadius: 8,
-                      padding: 10
-                    }}
-                  />
-                  <Pressable
-                    style={{
-                      backgroundColor: '#f0f0f0',
-                      padding: 10,
-                      borderRadius: 8,
-                    }}
-                  >
-                    <Text>Calcular</Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              {/* Botón continuar compra */}
-              <Pressable
-                onPress={() => navigation.navigate('infoCompra')}
-                style={{
-                  backgroundColor: '#000',
-                  padding: 15,
-                  borderRadius: 10,
-                  alignItems: 'center'
-                }}
-              >
-                <Text style={{ 
-                  color: 'white',
-                  fontSize: 16,
-                  fontWeight: '600'
-                }}>
-                  Finalizar Compra →
-                </Text>
-              </Pressable>
+          <View style={styles.shippingSection}>
+            <Text style={styles.shippingTitle}>
+              <Icon name="location-on" size={16} color="#000" /> Calcular tiempo de envío
+            </Text>
+            <View style={styles.postalCodeRow}>
+              <TextInput
+                placeholder="Ingresa tu código postal"
+                value={codigoPostal}
+                onChangeText={setCodigoPostal}
+                style={styles.postalCodeInput}
+              />
+              <TouchableOpacity style={styles.calculateButton}>
+                <Text style={styles.calculateButtonText}>Calcular</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        )}
-      </View>
+
+          <TouchableOpacity 
+            style={styles.checkoutButton}
+            onPress={() => navigation.navigate('infoCompra')}
+          >
+            <Text style={styles.checkoutButtonText}>
+              Continuar con la compra <Icon name="arrow-forward" size={16} color="#fff" />
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f8f8',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 15,
+    elevation: 2,
+  },
+  backButton: {
+    padding: 5,
+  },
+  progressBar: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: -24,
+  },
+  step: {
+    alignItems: 'center',
+  },
+  stepIconActive: {
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    backgroundColor: '#fff',
+    borderWidth: 2.5,
+    borderColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  stepIconInactive: {
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    backgroundColor: '#fff',
+    borderWidth: 2.5,
+    borderColor: '#e0e0e0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  progressLine: {
+    width: 100,
+    height: 2.5,
+    backgroundColor: '#e0e0e0',
+    marginHorizontal: 15,
+  },
+  stepTextActive: {
+    fontSize: 12,
+    marginTop: 4,
+    color: '#000',
+  },
+  stepTextInactive: {
+    fontSize: 12,
+    marginTop: 4,
+    color: '#999',
+  },
+  content: {
+    padding: 20,
+  },
+  cartTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    marginBottom: 20,
+  },
+  productCount: {
+    color: '#666',
+    fontSize: 20,
+  },
+  productCard: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 15,
+    elevation: 2,
+  },
+  productImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 4,
+  },
+  productDetails: {
+    flex: 1,
+    marginLeft: 15,
+  },
+  productTitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  productSpec: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  quantityControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  quantityButton: {
+    width: 30,
+    height: 30,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  quantity: {
+    marginHorizontal: 12,
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+  },
+  deleteText: {
+    color: '#ff0000',
+    marginLeft: 4,
+    fontSize: 14,
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 15,
+  },
+  summaryCard: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 25,
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 15,
+    elevation: 2,
+  },
+  summaryTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 15,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  totalRow: {
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 10,
+    marginTop: 5,
+  },
+  freeShipping: {
+    color: '#00b300',
+  },
+  shippingSection: {
+    marginTop: 20,
+  },
+  shippingTitle: {
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  postalCodeRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  postalCodeInput: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+  calculateButton: {
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    justifyContent: 'center',
+  },
+  checkoutButton: {
+    backgroundColor: '#000',
+    borderRadius: 15,
+    paddingVertical: 18,
+    alignItems: 'center',
+    marginTop: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  checkoutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+});
 
 export default Carrito;
