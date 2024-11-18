@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import Header from '../../components/Header';
 
+
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
