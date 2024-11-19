@@ -2,11 +2,11 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Header from './components/Header';
-import HomeScreen from './app/tabs/index';
-import RegisterScreen from './app/tabs/register';
-import CompraScreen from './app/tabs/compra';
-import CarritoScreen from './app/tabs/carrito';
-import InfoCompraScreen from './app/tabs/infoCompra';
+import HomeScreen from './app/(tabs)/index';
+import RegisterScreen from './app/(tabs)/register';
+import CompraScreen from './app/(tabs)/compra';
+import CarritoScreen from './app/(tabs)/carrito';
+import InfoCompraScreen from './app/(tabs)/infoCompra';
 
 const Stack = createStackNavigator();
 

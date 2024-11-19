@@ -309,8 +309,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   productImage: {
-    width: 70,
-    height: 70,
+    width: 120,
+    height: 120,
     borderRadius: 5,
   },
   productDetails: {

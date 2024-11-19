@@ -6,8 +6,11 @@ import visaIcon from '../../assets/visa-icon.png';
 import mastercardIcon from '../../assets/mastercard-icon.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 
 const InfoCompra = () => {
+  const navigation = useNavigation();
+
   const [formData, setFormData] = useState({
     tarjeta: '',
     numeroTarjeta: '',
@@ -156,7 +159,7 @@ const InfoCompra = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.navigate('carrito')}>
           <Icon name="arrow-back" size={28} color="#000" />
         </TouchableOpacity>
         <View style={styles.progressContainer}>
