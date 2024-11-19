@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, Image } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, Image, ScrollView, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Header from '../../components/Header';
 import visaIcon from '../../assets/visa-icon.png';
@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const InfoCompra = () => {
   const [formData, setFormData] = useState({
-    tarjeta: 'Visa',
+    tarjeta: '',
     numeroTarjeta: '',
     vencimiento: '',
     cvv: '',
@@ -18,10 +18,13 @@ const InfoCompra = () => {
     direccionPrincipal: '',
     direccionAlternativa: '',
     pais: '',
-    codigoPostal: ''
+    codigoPostal: '',
+    ciudad: '',
+    email: ''
   });
 
   const [total, setTotal] = useState(0);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const cargarTotal = async () => {
@@ -51,14 +54,84 @@ const InfoCompra = () => {
   }, []);
 
   const handleInputChange = (name, value) => {
+    // Aplicar límites según el campo
+    let limitedValue = value;
+    
+    switch (name) {
+      case 'numeroTarjeta':
+        limitedValue = value.replace(/\D/g, '').slice(0, 16);
+        break;
+      case 'vencimiento':
+        limitedValue = value.replace(/\D/g, '').slice(0, 4);
+        break;
+      case 'cvv':
+        limitedValue = value.replace(/\D/g, '').slice(0, 3);
+        break;
+      case 'nombre':
+      case 'apellido':
+        limitedValue = value.slice(0, 30);
+        break;
+      case 'codigoPostal':
+        limitedValue = value.replace(/\D/g, '').slice(0, 5);
+        break;
+      case 'telefono':
+        limitedValue = value.replace(/\D/g, '').slice(0, 10);
+        break;
+      default:
+        limitedValue = value;
+    }
+
     setFormData(prevData => ({
       ...prevData,
-      [name]: value
+      [name]: limitedValue
     }));
   };
 
+  const handleCardSelection = (tipo) => {
+    setFormData(prevData => ({
+      ...prevData,
+      tarjeta: tipo
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Agregar validación de tarjeta al inicio
+    if (!formData.tarjeta) newErrors.tarjeta = 'Seleccione una tarjeta';
+    
+    // Validar campos obligatorios
+    if (!formData.numeroTarjeta) newErrors.numeroTarjeta = 'Ingrese el número de tarjeta';
+    if (!formData.vencimiento) newErrors.vencimiento = 'Ingrese el vencimiento';
+    if (!formData.cvv) newErrors.cvv = 'Ingrese el CVV';
+    if (!formData.nombre) newErrors.nombre = 'Ingrese su nombre';
+    if (!formData.apellido) newErrors.apellido = 'Ingrese su apellido';
+    if (!formData.direccionPrincipal) newErrors.direccionPrincipal = 'Ingrese su dirección';
+    if (!formData.ciudad) newErrors.ciudad = 'Ingrese su ciudad';
+    if (!formData.codigoPostal) newErrors.codigoPostal = 'Ingrese el código postal';
+    if (!formData.email) newErrors.email = 'Ingrese su email';
+    if (!formData.telefono) newErrors.telefono = 'Ingrese su teléfono';
+
+    // Validación adicional para el formato del email
+    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Ingrese un email válido';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = () => {
-    // Lógica para procesar la compra
+    if (validateForm()) {
+      // Continuar con la compra
+      console.log('Formulario válido, procediendo con la compra');
+    } else {
+      Alert.alert(
+        "Error",
+        "Por favor complete todos los campos obligatorios",
+        [{ text: "OK" }]
+      );
+    }
   };
 
   const renderTarjetaIcon = (tipo) => {
@@ -72,153 +145,294 @@ const InfoCompra = () => {
     }
   };
 
+  // Actualizar los estilos del input según si hay error
+  const getInputStyle = (fieldName) => {
+    return [
+      styles.input,
+      errors[fieldName] && styles.inputError
+    ];
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color="#000" style={styles.backIcon} />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={28} color="#000" />
         </TouchableOpacity>
-        <View style={styles.progressBar}>
-          <View style={styles.step}>
-            <View style={styles.stepIconInactive}>
-              <Icon name="shopping-cart" size={20} color="#999" />
+        <View style={styles.progressContainer}>
+          <View style={styles.stepContainer}>
+            <View style={styles.cartIconContainer}>
+              <Icon name="shopping-cart" size={24} color="#999" />
             </View>
-            <Text style={styles.stepTextInactive}>Carrito</Text>
+            <Text style={styles.stepText}>Carrito</Text>
           </View>
           <View style={styles.progressLine} />
-          <View style={styles.step}>
-            <View style={styles.stepIconActive}>
-              <Icon name="credit-card" size={20} color="#000" />
+          <View style={styles.stepContainer}>
+            <View style={styles.paymentIconContainer}>
+              <Icon name="payment" size={24} color="#fff" />
             </View>
-            <Text style={styles.stepTextActive}>Pago</Text>
+            <Text style={styles.stepText}>Pago</Text>
           </View>
         </View>
       </View>
-      
-      <View style={styles.mainContent}>
-        <View style={styles.card}>
-          <View style={styles.columnsContainer}>
-            {/* Columna Método de Pago */}
-            <View style={styles.column}>
-              <Text style={styles.sectionTitle}>Método de Pago</Text>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Selecciona tu tarjeta</Text>
-                <View style={styles.pickerContainer}>
-                  <View style={styles.pickerWithIcon}>
-                    <Image 
-                      source={renderTarjetaIcon(formData.tarjeta)}
-                      style={styles.cardIcon}
-                    />
-                    <Picker
-                      selectedValue={formData.tarjeta}
-                      style={styles.picker}
-                      onValueChange={(value) => handleInputChange('tarjeta', value)}
-                    >
-                      <Picker.Item label="Visa" value="visa" />
-                      <Picker.Item label="Mastercard" value="mastercard" />
-                    </Picker>
-                  </View>
-                </View>
-                
-                <Text style={styles.label}>Número de Tarjeta</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.numeroTarjeta}
-                  onChangeText={(value) => handleInputChange('numeroTarjeta', value)}
-                  placeholder="1234 5678 9012 3456"
-                  keyboardType="numeric"
-                />
-                
-                <View style={styles.row}>
-                  <View style={styles.halfWidth}>
-                    <Text style={styles.label}>Vencimiento</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={formData.vencimiento}
-                      onChangeText={(value) => handleInputChange('vencimiento', value)}
-                      placeholder="MM/YY"
-                    />
-                  </View>
-                  <View style={styles.halfWidth}>
-                    <Text style={styles.label}>CVV</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={formData.cvv}
-                      onChangeText={(value) => handleInputChange('cvv', value)}
-                      placeholder="123"
-                      keyboardType="numeric"
-                      secureTextEntry
-                    />
-                  </View>
-                </View>
 
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                  <MaterialIcons name="shopping-cart" size={24} color="white" />
-                  <Text style={styles.buttonText}>Finalizar Compra</Text>
+      <ScrollView style={styles.mainContainer}>
+        <View style={styles.contentWrapper}>
+          <View style={styles.formColumn}>
+            <View style={styles.paymentSection}>
+              <Text style={styles.sectionTitle}>
+                Método de Pago <Text style={styles.requiredField}>*</Text>
+              </Text>
+              
+              <View style={[
+                styles.cardSelector,
+                errors.tarjeta && styles.cardSelectorError
+              ]}>
+                <TouchableOpacity 
+                  onPress={() => {
+                    handleCardSelection('visa');
+                    setErrors(prev => ({...prev, tarjeta: null}));
+                  }}
+                  style={[
+                    styles.cardOption, 
+                    formData.tarjeta === 'visa' && styles.cardOptionSelected
+                  ]}>
+                  <Image source={visaIcon} style={styles.cardIcon} />
+                  <Text style={styles.cardText}>Visa</Text>
                 </TouchableOpacity>
                 
-                <Text style={styles.totalText}>
-                  Total a pagar: ${total.toLocaleString()}
-                </Text>
+                <TouchableOpacity 
+                  onPress={() => {
+                    handleCardSelection('mastercard');
+                    setErrors(prev => ({...prev, tarjeta: null}));
+                  }}
+                  style={[
+                    styles.cardOption, 
+                    formData.tarjeta === 'mastercard' && styles.cardOptionSelected
+                  ]}>
+                  <Image source={mastercardIcon} style={styles.cardIcon} />
+                  <Text style={styles.cardText}>Mastercard</Text>
+                </TouchableOpacity>
               </View>
-            </View>
+              
+              {errors.tarjeta && (
+                <Text style={styles.errorText}>{errors.tarjeta}</Text>
+              )}
 
-            {/* Columna Datos de Envío */}
-            <View style={styles.column}>
-              <Text style={styles.sectionTitle}>Datos de Envío</Text>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Nombre</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.nombre}
-                  onChangeText={(value) => handleInputChange('nombre', value)}
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Número de Tarjeta</Text>
+                <TextInput 
+                  style={getInputStyle('numeroTarjeta')}
+                  placeholder="1234 5678 9012 3456"
+                  placeholderTextColor="#999"
+                  keyboardType="numeric"
+                  value={formData.numeroTarjeta}
+                  onChangeText={(value) => {
+                    handleInputChange('numeroTarjeta', value);
+                    setErrors(prev => ({...prev, numeroTarjeta: null}));
+                  }}
+                  maxLength={16}
                 />
-                
-                <Text style={styles.label}>Apellido</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.apellido}
-                  onChangeText={(value) => handleInputChange('apellido', value)}
-                />
-                
-                <Text style={styles.label}>Dirección Principal</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.direccionPrincipal}
-                  onChangeText={(value) => handleInputChange('direccionPrincipal', value)}
-                />
-                
-                <Text style={styles.label}>Dirección Alternativa (opcional)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.direccionAlternativa}
-                  onChangeText={(value) => handleInputChange('direccionAlternativa', value)}
-                />
-                
-                <View style={styles.row}>
-                  <View style={styles.halfWidth}>
-                    <Text style={styles.label}>País</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={formData.pais}
-                      onChangeText={(value) => handleInputChange('pais', value)}
-                    />
-                  </View>
-                  <View style={styles.halfWidth}>
-                    <Text style={styles.label}>Código Postal</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={formData.codigoPostal}
-                      onChangeText={(value) => handleInputChange('codigoPostal', value)}
-                      keyboardType="numeric"
-                    />
-                  </View>
+                {errors.numeroTarjeta && (
+                  <Text style={styles.errorText}>{errors.numeroTarjeta}</Text>
+                )}
+              </View>
+
+              <View style={styles.row}>
+                <View style={styles.halfWidth}>
+                  <Text style={styles.inputLabel}>Vencimiento</Text>
+                  <TextInput 
+                    style={getInputStyle('vencimiento')}
+                    placeholder="MM/YY"
+                    placeholderTextColor="#999"
+                    keyboardType="numeric"
+                    value={formData.vencimiento}
+                    onChangeText={(value) => {
+                      handleInputChange('vencimiento', value);
+                      setErrors(prev => ({...prev, vencimiento: null}));
+                    }}
+                    maxLength={4}
+                  />
+                  {errors.vencimiento && (
+                    <Text style={styles.errorText}>{errors.vencimiento}</Text>
+                  )}
+                </View>
+                <View style={styles.halfWidth}>
+                  <Text style={styles.inputLabel}>CVV</Text>
+                  <TextInput 
+                    style={getInputStyle('cvv')}
+                    placeholder="123"
+                    placeholderTextColor="#999"
+                    secureTextEntry
+                    keyboardType="numeric"
+                    value={formData.cvv}
+                    onChangeText={(value) => {
+                      handleInputChange('cvv', value);
+                      setErrors(prev => ({...prev, cvv: null}));
+                    }}
+                    maxLength={3}
+                  />
+                  {errors.cvv && (
+                    <Text style={styles.errorText}>{errors.cvv}</Text>
+                  )}
                 </View>
               </View>
             </View>
+
+            <View style={styles.personalDataSection}>
+              <Text style={styles.sectionTitle}>Datos Personales</Text>
+              
+              <View style={styles.row}>
+                <View style={styles.halfWidth}>
+                  <Text style={styles.inputLabel}>Nombre</Text>
+                  <TextInput 
+                    style={getInputStyle('nombre')}
+                    placeholder="Juan"
+                    placeholderTextColor="#999"
+                    value={formData.nombre}
+                    onChangeText={(value) => {
+                      handleInputChange('nombre', value);
+                      setErrors(prev => ({...prev, nombre: null}));
+                    }}
+                    maxLength={30}
+                  />
+                  {errors.nombre && (
+                    <Text style={styles.errorText}>{errors.nombre}</Text>
+                  )}
+                </View>
+                <View style={styles.halfWidth}>
+                  <Text style={styles.inputLabel}>Apellido</Text>
+                  <TextInput 
+                    style={getInputStyle('apellido')}
+                    placeholder="Pérez"
+                    placeholderTextColor="#999"
+                    value={formData.apellido}
+                    onChangeText={(value) => {
+                      handleInputChange('apellido', value);
+                      setErrors(prev => ({...prev, apellido: null}));
+                    }}
+                    maxLength={30}
+                  />
+                  {errors.apellido && (
+                    <Text style={styles.errorText}>{errors.apellido}</Text>
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>
+                  Dirección de Facturación <Text style={styles.requiredField}>*</Text>
+                </Text>
+                <TextInput 
+                  style={getInputStyle('direccionPrincipal')}
+                  placeholder="Calle y número"
+                  placeholderTextColor="#999"
+                  value={formData.direccionPrincipal}
+                  onChangeText={(value) => {
+                    handleInputChange('direccionPrincipal', value);
+                    setErrors(prev => ({...prev, direccionPrincipal: null}));
+                  }}
+                />
+                {errors.direccionPrincipal && (
+                  <Text style={styles.errorText}>{errors.direccionPrincipal}</Text>
+                )}
+              </View>
+
+              <View style={styles.row}>
+                <View style={styles.halfWidth}>
+                  <Text style={styles.inputLabel}>
+                    Ciudad <Text style={styles.requiredField}>*</Text>
+                  </Text>
+                  <TextInput 
+                    style={getInputStyle('ciudad')}
+                    placeholder="Ciudad"
+                    placeholderTextColor="#999"
+                    value={formData.ciudad}
+                    onChangeText={(value) => {
+                      handleInputChange('ciudad', value);
+                      setErrors(prev => ({...prev, ciudad: null}));
+                    }}
+                  />
+                  {errors.ciudad && (
+                    <Text style={styles.errorText}>{errors.ciudad}</Text>
+                  )}
+                </View>
+                <View style={styles.halfWidth}>
+                  <Text style={styles.inputLabel}>Código Postal</Text>
+                  <TextInput 
+                    style={getInputStyle('codigoPostal')}
+                    placeholder="12345"
+                    placeholderTextColor="#999"
+                    keyboardType="numeric"
+                    value={formData.codigoPostal}
+                    onChangeText={(value) => {
+                      handleInputChange('codigoPostal', value);
+                      setErrors(prev => ({...prev, codigoPostal: null}));
+                    }}
+                    maxLength={5}
+                  />
+                  {errors.codigoPostal && (
+                    <Text style={styles.errorText}>{errors.codigoPostal}</Text>
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>
+                  Email <Text style={styles.requiredField}>*</Text>
+                </Text>
+                <TextInput 
+                  style={getInputStyle('email')}
+                  placeholder="ejemplo@correo.com"
+                  placeholderTextColor="#999"
+                  keyboardType="email-address"
+                  value={formData.email}
+                  onChangeText={(value) => {
+                    handleInputChange('email', value);
+                    setErrors(prev => ({...prev, email: null}));
+                  }}
+                  autoCapitalize="none"
+                />
+                {errors.email && (
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                )}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Teléfono</Text>
+                <TextInput 
+                  style={getInputStyle('telefono')}
+                  placeholder="+54 (11) 1234-5678"
+                  placeholderTextColor="#999"
+                  keyboardType="phone-pad"
+                  value={formData.telefono}
+                  onChangeText={(value) => {
+                    handleInputChange('telefono', value);
+                    setErrors(prev => ({...prev, telefono: null}));
+                  }}
+                  maxLength={10}
+                />
+                {errors.telefono && (
+                  <Text style={styles.errorText}>{errors.telefono}</Text>
+                )}
+              </View>
+            </View>
+          </View>
+          
+          <View style={styles.summaryColumn}>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryTitle}>Resumen de Compra</Text>
+              <View style={styles.summaryRow}>
+                <Text>Total a Pagar</Text>
+                <Text style={styles.totalAmount}>${total.toLocaleString()}</Text>
+              </View>
+              <TouchableOpacity style={styles.checkoutButton} onPress={handleSubmit}>
+                <Text style={styles.checkoutButtonText}>Finalizar Compra</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -226,211 +440,214 @@ const InfoCompra = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 20,
     paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 15,
-    elevation: 2,
   },
-  mainContent: {
+  progressContainer: {
     flex: 1,
-    marginTop: 30,
-    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepContainer: {
     alignItems: 'center',
   },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 35,
-    width: '90%',
-    maxWidth: 900,
+  cartIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  paymentIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ff4646',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  columnsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
+  progressLine: {
+    width: 100,
+    height: 2,
+    backgroundColor: '#e0e0e0',
+    marginHorizontal: 15,
   },
-  column: {
+  stepText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginTop: 8,
+  },
+  mainContainer: {
     flex: 1,
-    paddingHorizontal: 15,
+    backgroundColor: '#fff',
   },
-  sectionTitle: {
-    fontSize: 24,
+  contentWrapper: {
+    flexDirection: 'row',
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    marginHorizontal: 20,
+    marginVertical: 20,
+  },
+  formColumn: {
+    flex: 3,
+    paddingRight: 30,
+    borderRightWidth: 1,
+    borderRightColor: '#eee',
+  },
+  summaryColumn: {
+    flex: 2,
+    paddingLeft: 30,
+  },
+  summaryCard: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  summaryTitle: {
+    fontSize: 20,
     fontWeight: '600',
-    marginBottom: 25,
-    color: '#2d3436',
-    borderBottom: '2px solid #f1f2f6',
-    paddingBottom: 10,
-  },
-  inputGroup: {
     marginBottom: 15,
   },
-  label: {
-    fontSize: 15,
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  checkoutButton: {
+    backgroundColor: '#ff4646',
+    padding: 15,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  checkoutButtonText: {
+    color: '#fff',
+    fontWeight: '500',
+  },
+  paymentSection: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 20,
+  },
+  cardSelector: {
+    flexDirection: 'row',
+    gap: 15,
+    marginBottom: 10,
+    padding: 5,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  cardSelectorError: {
+    borderColor: '#ff4646',
+  },
+  cardOption: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+  },
+  cardOptionSelected: {
+    borderColor: '#ff4646',
+    backgroundColor: '#fff5f5',
+  },
+  cardIcon: {
+    width: 40,
+    height: 25,
+    resizeMode: 'contain',
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#666',
     marginBottom: 8,
-    color: '#4a4a4a',
     fontWeight: '500',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#e1e4e8',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 18,
-    backgroundColor: 'white',
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    padding: 15,
     fontSize: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    backgroundColor: '#fff',
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 15,
     marginBottom: 20,
   },
   halfWidth: {
-    width: '48%',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#e1e4e8',
-    borderRadius: 8,
-    marginBottom: 18,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-  },
-  pickerWithIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingLeft: 10,
-  },
-  cardIcon: {
-    width: 30,
-    height: 20,
-    resizeMode: 'contain',
-    marginRight: 10,
-  },
-  picker: {
     flex: 1,
-    height: 50,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 2,
-    borderColor: 'transparent',
   },
-  button: {
-    backgroundColor: '#FF4D4D',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderRadius: 8,
-    marginTop: 10,
-    shadowColor: '#FF4D4D',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 17,
-    marginLeft: 10,
-    fontWeight: '600',
-  },
-  totalText: {
-    fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginTop: 30,
-    color: '#2d3436',
-    padding: 15,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-  },
-  backButton: {
-    padding: 5,
-  },
-  progressBar: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: -24,
-  },
-  step: {
-    alignItems: 'center',
-  },
-  stepIconActive: {
-    width: 45,
-    height: 45,
-    borderRadius: 25,
+  personalDataSection: {
     backgroundColor: '#fff',
-    borderWidth: 2.5,
-    borderColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  stepIconInactive: {
-    width: 45,
-    height: 45,
-    borderRadius: 25,
-    backgroundColor: '#fff',
-    borderWidth: 2.5,
-    borderColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
+  inputError: {
+    borderColor: '#ff4646',
+    borderWidth: 1,
   },
-  progressLine: {
-    width: 100,
-    height: 2.5,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 15,
-  },
-  stepTextActive: {
+  errorText: {
+    color: '#ff4646',
     fontSize: 12,
-    marginTop: 4,
-    color: '#000',
+    marginTop: 5,
+    marginLeft: 5,
   },
-  stepTextInactive: {
-    fontSize: 12,
-    marginTop: 4,
-    color: '#999',
-  },
+  requiredField: {
+    color: '#ff4646',
+    marginLeft: 4,
+  }
 });
 
 export default InfoCompra;

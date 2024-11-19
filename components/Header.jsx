@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Pressable } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Pressable, Platform, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -133,14 +133,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
-    paddingHorizontal: 70,
+    paddingHorizontal: Platform.select({
+      web: '5%',
+      default: 10
+    }),
     paddingVertical: 10,
-    height: 120,
+    height: Platform.select({
+      web: 120,
+      default: 80
+    }),
     zIndex: 2,
   },
   menuButton: {
     padding: 5,
-    marginRight: 20,
+    marginRight: Platform.select({
+      web: 20,
+      default: 5
+    }),
     outlineStyle: 'none',
   },
   searchContainer: {
@@ -149,15 +158,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
     borderRadius: 8,
-    marginHorizontal: 190,
+    marginHorizontal: Platform.select({
+      web: '5%',
+      default: 10
+    }),
     paddingHorizontal: 10,
-    height: 70,
+    height: Platform.select({
+      web: 70,
+      default: 40
+    }),
   },
   searchInput: {
     flex: 1,
-    fontSize: 18,
-    paddingVertical: 20,
-    marginLeft: 12,
+    fontSize: Platform.select({
+      web: 18,
+      default: 14
+    }),
+    paddingVertical: Platform.select({
+      web: 20,
+      default: 8
+    }),
+    marginLeft: Platform.select({
+      web: 12,
+      default: 8
+    }),
     outlineStyle: 'none',
   },
   searchButton: {
@@ -169,7 +193,10 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 5,
-    marginLeft: 40,
+    marginLeft: Platform.select({
+      web: 40,
+      default: 10
+    }),
   },
   modalOverlayContainer: {
     flex: 1,
@@ -177,12 +204,21 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     position: 'absolute',
-    top: 120,
+    top: Platform.select({
+      web: 120,
+      default: 80
+    }),
     left: 0,
     backgroundColor: 'white',
-    width: 380,
+    width: Platform.select({
+      web: 380,
+      default: '80%'
+    }),
     borderRadius: 25,
-    padding: 20,
+    padding: Platform.select({
+      web: 20,
+      default: 15
+    }),
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -195,14 +231,20 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 25,
+    padding: Platform.select({
+      web: 25,
+      default: 15
+    }),
     borderRadius: 20,
     marginVertical: 8,
     backgroundColor: '#f8f9fa',
     transition: 'all 0.2s ease',
   },
   menuText: {
-    fontSize: 20,
+    fontSize: Platform.select({
+      web: 20,
+      default: 16
+    }),
     marginLeft: 18,
     color: '#444',
     fontWeight: '500',

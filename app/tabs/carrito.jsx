@@ -65,23 +65,29 @@ const Carrito = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color="#000" style={styles.backIcon} />
+          <Icon name="arrow-back" size={28} color="#000" />
         </TouchableOpacity>
-        <View style={styles.progressBar}>
-          <View style={styles.step}>
-            <View style={styles.stepIconActive}>
-              <Icon name="shopping-cart" size={20} color="#000" />
+        <View style={styles.progressContainer}>
+          <View style={styles.stepContainer}>
+            <View style={styles.cartIconContainer}>
+              <Icon name="shopping-cart" size={24} color="#fff" />
             </View>
-            <Text style={styles.stepTextActive}>Carrito</Text>
+            <Text style={styles.stepText}>Carrito</Text>
           </View>
           <View style={styles.progressLine} />
-          <View style={styles.step}>
-            <View style={styles.stepIconInactive}>
-              <Icon name="credit-card" size={20} color="#999" />
+          <View style={styles.stepContainer}>
+            <View style={styles.paymentIconContainer}>
+              <Icon name="payment" size={24} color="#999" />
             </View>
-            <Text style={styles.stepTextInactive}>Pago</Text>
+            <Text style={styles.stepText}>Pago</Text>
           </View>
         </View>
+      </View>
+
+      <View style={styles.titleContainer}>
+        <Text style={styles.cartTitle}>
+          Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
+        </Text>
       </View>
 
       <View style={styles.mainContainer}>
@@ -185,75 +191,80 @@ const Carrito = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 20,
     paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 15,
-    elevation: 2,
   },
   backButton: {
-    padding: 5,
+    padding: 10,
+    marginRight: 15,
   },
-  progressBar: {
+  progressContainer: {
     flex: 1,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: -24,
   },
-  step: {
+  stepContainer: {
     alignItems: 'center',
   },
-  stepIconActive: {
-    width: 45,
-    height: 45,
+  cartIconContainer: {
+    width: 50,
+    height: 50,
     borderRadius: 25,
-    backgroundColor: '#fff',
-    borderWidth: 2.5,
-    borderColor: '#000',
+    backgroundColor: '#ff4646',
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 3,
   },
-  stepIconInactive: {
-    width: 45,
-    height: 45,
+  paymentIconContainer: {
+    width: 50,
+    height: 50,
     borderRadius: 25,
-    backgroundColor: '#fff',
-    borderWidth: 2.5,
-    borderColor: '#e0e0e0',
+    backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center',
   },
   progressLine: {
     width: 100,
-    height: 2.5,
+    height: 2,
     backgroundColor: '#e0e0e0',
     marginHorizontal: 15,
   },
-  stepTextActive: {
-    fontSize: 12,
-    marginTop: 4,
-    color: '#000',
+  stepText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginTop: 8,
   },
-  stepTextInactive: {
-    fontSize: 12,
-    marginTop: 4,
-    color: '#999',
+  titleContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  cartTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  productCount: {
+    fontWeight: '400',
+    color: '#666',
   },
   mainContainer: {
     flex: 1,
@@ -261,9 +272,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 30,
     backgroundColor: '#fff',
-    marginHorizontal: 30,
-    marginVertical: 50,
-    borderRadius: 20,
+    marginHorizontal: 20,
+    marginVertical: 20,
+    borderRadius: 10,
   },
   productsColumn: {
     flex: 3,
@@ -289,18 +300,18 @@ const styles = StyleSheet.create({
   },
   productCard: {
     flexDirection: 'row',
-    marginBottom: 10,
-    marginLeft: 10,
-    padding: 12,
-    paddingHorizontal: 5,
+    marginBottom: 15,
+    marginLeft: 0,
+    padding: 15,
+    paddingHorizontal: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     alignItems: 'center',
   },
   productImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 8,
+    width: 70,
+    height: 70,
+    borderRadius: 5,
   },
   productDetails: {
     flex: 1,
@@ -322,13 +333,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   quantityButton: {
-    width: 28,
-    height: 28,
+    width: 24,
+    height: 24,
     borderWidth: 1,
     borderColor: '#ff4646',
-    borderRadius: 14,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
   quantityButtonText: {
     fontSize: 16,
@@ -358,8 +370,10 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     padding: 20,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#fff',
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   summaryTitle: {
     fontSize: 20,
@@ -393,39 +407,32 @@ const styles = StyleSheet.create({
   },
   postalCodeInput: {
     flex: 1,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#e0e0e0',
-    borderRadius: 12,
+    borderRadius: 25,
     paddingHorizontal: 15,
-    paddingVertical: 12,
-    fontSize: 16,
+    paddingVertical: 10,
+    fontSize: 14,
   },
   calculateButton: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 10,
+    borderRadius: 25,
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   checkoutButton: {
     backgroundColor: '#ff4646',
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 25,
     alignItems: 'center',
     marginTop: 20,
   },
   checkoutButtonText: {
     color: '#fff',
     fontWeight: '500',
-  },
-  cartTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 15,
-    paddingLeft: 10,
-  },
-  productCount: {
-    fontWeight: '400',
   },
 });
 

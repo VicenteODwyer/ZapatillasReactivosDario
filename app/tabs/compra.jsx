@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, Modal } from 'react-native';
+import { View, Text, Image, Pressable, Modal, ScrollView, useWindowDimensions } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +14,8 @@ const Compra = () => {
   const [talleSeleccionado, setTalleSeleccionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [showError, setShowError] = useState(false);
+  const { width } = useWindowDimensions();
+  const isMobile = width < 768;
   
   if (!zapatilla) {
     return (
@@ -70,226 +72,231 @@ const Compra = () => {
   };
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <Header />
-      <View style={{ 
-        flex: 1, 
-      backgroundColor: '#fff',
-      padding: 20
-    }}>
-      <View style={{ 
-        flexDirection: 'row',
-        gap: 60,
-        maxWidth: 1200,
-        marginHorizontal: 'auto',
-        alignItems: 'flex-start'
-      }}>
-        {/* Sección izquierda - Imágenes */}
-        <View style={{ flex: 1.2 }}>
-          {/* Imagen principal */}
-          <View style={{
-            backgroundColor: '#fff',
-            borderRadius: 20,
-            padding: 20,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 10,
-            marginBottom: 20
-          }}>
-            <Image 
-              source={zapatilla.imagen}
-              style={{ 
-                width: '100%',
-                height: 500,
-                objectFit: 'contain',
-              }}
-            />
-          </View>
-          
-          {/* Miniaturas */}
+      <ScrollView style={{ flex: 1, backgroundColor: '#fff' }}>
+        <View style={{ 
+          padding: isMobile ? 10 : 20,
+          alignItems: 'center'
+        }}>
+          {/* Contenedor principal */}
           <View style={{ 
-            flexDirection: 'row',
-            gap: 15,
-            justifyContent: 'center'
+            width: '100%',
+            maxWidth: 1200,
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: 30,
           }}>
-            {[1, 2, 3, 4].map((_, index) => (
-              <View
-                key={index}
-                style={{
-                  padding: 10,
-                  backgroundColor: '#fff',
-                  borderRadius: 10,
-                  borderWidth: index === 0 ? 2 : 1,
-                  borderColor: index === 0 ? '#ff4d4d' : '#eee',
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 5,
-                }}
-              >
+            {/* Sección izquierda - Imágenes */}
+            <View style={{ 
+              width: isMobile ? '100%' : '50%',
+              alignItems: 'center'
+            }}>
+              {/* Imagen principal */}
+              <View style={{
+                width: '100%',
+                backgroundColor: '#fff',
+                borderRadius: 15,
+                padding: isMobile ? 10 : 20,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 10,
+                marginBottom: isMobile ? 10 : 20
+              }}>
                 <Image 
                   source={zapatilla.imagen}
                   style={{ 
-                    width: 80,
-                    height: 80,
-                    objectFit: 'contain'
+                    width: '100%',
+                    height: isMobile ? 250 : 400,
+                    resizeMode: 'contain'
                   }}
                 />
               </View>
-            ))}
-          </View>
-        </View>
+              
+              {/* Miniaturas */}
+              <View style={{ 
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 10,
+                justifyContent: 'center',
+                padding: isMobile ? 5 : 10
+              }}>
+                {[1, 2, 3, 4].map((_, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      padding: 5,
+                      backgroundColor: '#fff',
+                      borderRadius: 8,
+                      borderWidth: index === 0 ? 2 : 1,
+                      borderColor: index === 0 ? '#ff4d4d' : '#eee',
+                    }}
+                  >
+                    <Image 
+                      source={zapatilla.imagen}
+                      style={{ 
+                        width: isMobile ? 60 : 80,
+                        height: isMobile ? 60 : 80,
+                        resizeMode: 'contain'
+                      }}
+                    />
+                  </View>
+                ))}
+              </View>
+            </View>
 
-        {/* Sección derecha - Detalles */}
-        <View style={{ flex: 1, paddingTop: 20 }}>
-          <Text style={{ 
-            fontSize: 32, 
-            fontWeight: '600', 
-            marginBottom: 20,
-            color: '#333'
-          }}>
-            {zapatilla.nombre}
-          </Text>
-
-          <View style={{ 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            gap: 15,
-            marginBottom: 30
-          }}>
-            <Text style={{ 
-              fontSize: 36, 
-              fontWeight: '700',
-              color: '#333'
-            }}>
-              ${precioConDescuento.toLocaleString()}
-            </Text>
-            <View style={{
-              backgroundColor: '#ff4d4d',
-              paddingVertical: 8,
-              paddingHorizontal: 12,
-              borderRadius: 8
+            {/* Sección derecha - Detalles */}
+            <View style={{ 
+              width: isMobile ? '100%' : '50%',
+              padding: isMobile ? 10 : 20,
+              alignSelf: isMobile ? 'center' : 'flex-start'
             }}>
               <Text style={{ 
-                color: 'white',
-                fontWeight: '500'
+                fontSize: isMobile ? 24 : 32,
+                fontWeight: '600',
+                marginBottom: 15
               }}>
-                -10% en transferencia bancaria
+                {zapatilla.nombre}
               </Text>
-            </View>
-          </View>
 
-          {/* Selector de talle */}
-          <Text style={{ 
-            fontSize: 22,
-            fontWeight: '600',
-            marginBottom: 15,
-            color: '#333'
-          }}>
-            Selecciona tu talle
-          </Text>
-          <View style={{ 
-            flexDirection: 'row', 
-            gap: 10,
-            marginBottom: 30
-          }}>
-            {talles.map((talle) => (
-              <Pressable
-                key={talle}
-                onPress={() => setTalleSeleccionado(talle)}
-                style={{ 
-                  width: 60,
-                  height: 60,
-                  borderRadius: 10,
-                  borderWidth: 2,
-                  borderColor: talleSeleccionado === talle ? '#ff4d4d' : '#eee',
+              {/* Precio y descuento */}
+              <View style={{ 
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: isMobile ? 'flex-start' : 'center',
+                gap: 10,
+                marginBottom: 20
+              }}>
+                <Text style={{ 
+                  fontSize: isMobile ? 28 : 36,
+                  fontWeight: '700'
+                }}>
+                  ${precioConDescuento.toLocaleString()}
+                </Text>
+                <View style={{
+                  backgroundColor: '#ff4d4d',
+                  padding: 8,
+                  borderRadius: 8
+                }}>
+                  <Text style={{ 
+                    color: 'white',
+                    fontSize: isMobile ? 12 : 14
+                  }}>
+                    -10% en transferencia bancaria
+                  </Text>
+                </View>
+              </View>
+
+              {/* Selector de talle */}
+              <Text style={{ 
+                fontSize: isMobile ? 18 : 22,
+                fontWeight: '600',
+                marginBottom: 10
+              }}>
+                Selecciona tu talle
+              </Text>
+              <View style={{ 
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 8,
+                marginBottom: 20
+              }}>
+                {talles.map((talle) => (
+                  <Pressable
+                    key={talle}
+                    onPress={() => setTalleSeleccionado(talle)}
+                    style={{ 
+                      width: isMobile ? 50 : 60,
+                      height: isMobile ? 50 : 60,
+                      borderRadius: 8,
+                      borderWidth: 2,
+                      borderColor: talleSeleccionado === talle ? '#ff4d4d' : '#eee',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Text style={{
+                      fontSize: isMobile ? 16 : 18,
+                      fontWeight: '500',
+                      color: talleSeleccionado === talle ? '#ff4d4d' : '#666'
+                    }}>{talle}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Selector de cantidad */}
+              <View style={{ 
+                marginBottom: 20,
+                gap: 10
+              }}>
+                <Text style={{ 
+                  fontSize: isMobile ? 18 : 22,
+                  fontWeight: '600'
+                }}>
+                  Cantidad
+                </Text>
+                <View style={{ 
+                  flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: talleSeleccionado === talle ? '#fff' : '#f8f8f8'
+                  gap: 15
+                }}>
+                  <Pressable
+                    onPress={() => cantidad > 1 && setCantidad(cantidad - 1)}
+                    style={{ 
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                      backgroundColor: '#f8f8f8',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderWidth: 2,
+                      borderColor: '#eee'
+                    }}
+                  >
+                    <Text style={{ fontSize: 24, color: '#666' }}>-</Text>
+                  </Pressable>
+                  <Text style={{ fontSize: 24, fontWeight: '500' }}>{cantidad}</Text>
+                  <Pressable
+                    onPress={() => setCantidad(cantidad + 1)}
+                    style={{ 
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                      backgroundColor: '#f8f8f8',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderWidth: 2,
+                      borderColor: '#eee'
+                    }}
+                  >
+                    <Text style={{ fontSize: 24, color: '#666' }}>+</Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* Botón de agregar al carrito */}
+              <Pressable
+                onPress={handleAgregarCarrito}
+                style={{ 
+                  backgroundColor: '#ff4d4d',
+                  padding: isMobile ? 15 : 20,
+                  borderRadius: 12,
+                  alignItems: 'center'
                 }}
               >
-                <Text style={{
-                  fontSize: 18,
-                  fontWeight: '500',
-                  color: talleSeleccionado === talle ? '#ff4d4d' : '#666'
-                }}>{talle}</Text>
+                <Text style={{ 
+                  color: 'white',
+                  fontSize: isMobile ? 16 : 20,
+                  fontWeight: '600'
+                }}>
+                  Agregar al Carrito
+                </Text>
               </Pressable>
-            ))}
+            </View>
           </View>
-
-          {/* Selector de cantidad */}
-          <Text style={{ 
-            fontSize: 22,
-            fontWeight: '600',
-            marginBottom: 15,
-            color: '#333'
-          }}>
-            Cantidad
-          </Text>
-          <View style={{ 
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 20,
-            marginBottom: 40
-          }}>
-            <Pressable
-              onPress={() => cantidad > 1 && setCantidad(cantidad - 1)}
-              style={{ 
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: '#f8f8f8',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderWidth: 2,
-                borderColor: '#eee'
-              }}
-            >
-              <Text style={{ fontSize: 24, color: '#666' }}>-</Text>
-            </Pressable>
-            <Text style={{ fontSize: 24, fontWeight: '500' }}>{cantidad}</Text>
-            <Pressable
-              onPress={() => setCantidad(cantidad + 1)}
-              style={{ 
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: '#f8f8f8',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderWidth: 2,
-                borderColor: '#eee'
-              }}
-            >
-              <Text style={{ fontSize: 24, color: '#666' }}>+</Text>
-            </Pressable>
-          </View>
-
-          {/* Botón de agregar al carrito */}
-          <Pressable
-            onPress={handleAgregarCarrito}
-            style={{ 
-              backgroundColor: '#ff4d4d',
-              padding: 20,
-              borderRadius: 15,
-              alignItems: 'center',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              gap: 10
-            }}
-          >
-            <Text style={{ 
-              color: 'white',
-              fontSize: 20,
-              fontWeight: '600'
-            }}>
-              Agregar al Carrito
-            </Text>
-          </Pressable>
         </View>
-      </View>
+      </ScrollView>
 
+      {/* Modales */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -300,17 +307,15 @@ const Compra = () => {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          padding: isMobile ? 15 : 20
         }}>
           <View style={{
             backgroundColor: 'white',
-            padding: 20,
+            padding: isMobile ? 15 : 20,
             borderRadius: 15,
-            width: '80%',
-            maxWidth: 400,
-            alignItems: 'center',
-            gap: 20,
-            position: 'relative'
+            width: '95%',
+            maxWidth: 400
           }}>
             <Pressable
               onPress={() => setModalVisible(false)}
@@ -401,10 +406,11 @@ const Compra = () => {
             backgroundColor: 'white',
             padding: 20,
             borderRadius: 15,
-            width: '80%',
+            width: '90%',
             maxWidth: 400,
             alignItems: 'center',
-            gap: 20
+            gap: 20,
+            padding: 20
           }}>
             <Ionicons name="alert-circle" size={50} color="#ff4d4d" />
             
@@ -437,7 +443,6 @@ const Compra = () => {
           </View>
         </View>
       </Modal>
-    </View>
     </View>
   );
 };
