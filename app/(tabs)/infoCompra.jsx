@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, Image, ScrollView, Alert, Dimensions } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, Image, ScrollView, Alert, Dimensions, Modal, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Header from '../../components/Header';
 import visaIcon from '../../assets/visa-icon.png';
@@ -31,6 +31,8 @@ const InfoCompra = () => {
 
   const [total, setTotal] = useState(0);
   const [errors, setErrors] = useState({});
+  const [showThankYouModal, setShowThankYouModal] = useState(false);
+  const progressAnimation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const cargarTotal = async () => {
@@ -64,24 +66,54 @@ const InfoCompra = () => {
     
     switch (name) {
       case 'numeroTarjeta':
-        limitedValue = value.replace(/\D/g, '').slice(0, 16);
+        // Eliminar caracteres no numéricos y limitar a 16 dígitos
+        const cardNumbers = value.replace(/\D/g, '').slice(0, 16);
+        
+        // Formatear con guiones cada 4 dígitos
+        const parts = [];
+        for (let i = 0; i < cardNumbers.length; i += 4) {
+          parts.push(cardNumbers.slice(i, i + 4));
+        }
+        limitedValue = parts.join('-');
         break;
       case 'vencimiento':
-        // Eliminar caracteres no numéricos
-        limitedValue = value.replace(/\D/g, '');
-        
-        // Validar el mes (primeros dos dígitos)
-        if (limitedValue.length >= 2) {
-          const month = parseInt(limitedValue.substring(0, 2));
-          if (month > 12) {
-            // Si el mes es inválido, solo mantener el primer dígito
-            limitedValue = limitedValue.substring(0, 1);
+        // Si estamos borrando
+        if (value.length < formData.vencimiento.length) {
+          // Si estamos borrando justo después de la barra
+          if (value.length === 3) {
+            limitedValue = value.substring(0, 2);
+          } else {
+            // Para cualquier otro caso de borrado, mantener el valor tal cual
+            limitedValue = value;
           }
-        }
-        
-        // Formatear como MM/YY
-        if (limitedValue.length >= 2) {
-          limitedValue = limitedValue.substring(0, 2) + '/' + limitedValue.substring(2, 4);
+        } else {
+          // Eliminar caracteres no numéricos
+          limitedValue = value.replace(/\D/g, '');
+          
+          // Validar el primer dígito del mes
+          if (limitedValue.length === 1) {
+            const firstDigit = parseInt(limitedValue);
+            if (firstDigit > 1) {
+              limitedValue = '0' + firstDigit;
+            }
+          }
+          
+          // Validar el segundo dígito del mes
+          if (limitedValue.length >= 2) {
+            const firstDigit = parseInt(limitedValue.substring(0, 1));
+            const secondDigit = parseInt(limitedValue.substring(1, 2));
+            
+            if (firstDigit === 1 && secondDigit > 2) {
+              limitedValue = limitedValue.substring(0, 1);
+            } else if (firstDigit === 0 && secondDigit === 0) {
+              limitedValue = limitedValue.substring(0, 1);
+            }
+          }
+          
+          // Formatear como MM/YY
+          if (limitedValue.length >= 2) {
+            limitedValue = limitedValue.substring(0, 2) + '/' + limitedValue.substring(2, 4);
+          }
         }
         break;
       case 'cvv':
@@ -165,10 +197,22 @@ const InfoCompra = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const startProgressAnimation = () => {
+    Animated.timing(progressAnimation, {
+      toValue: 1,
+      duration: 5000,
+      useNativeDriver: false,
+    }).start();
+  };
+
   const handleSubmit = () => {
     if (validateForm()) {
-      // Continuar con la compra
-      console.log('Formulario válido, procediendo con la compra');
+      setShowThankYouModal(true);
+      startProgressAnimation();
+      setTimeout(() => {
+        setShowThankYouModal(false);
+        navigation.navigate('index');
+      }, 5000);
     } else {
       Alert.alert(
         "Error",
@@ -355,7 +399,7 @@ const InfoCompra = () => {
                 <Text style={styles.inputLabel}>Teléfono</Text>
                 <TextInput 
                   style={getInputStyle('telefono')}
-                  placeholder="+54 (111) 1234-5678"
+                  placeholder="+54 (299) 1234-5678"
                   placeholderTextColor="#999"
                   keyboardType="numeric"
                   value={formData.telefono}
@@ -428,7 +472,7 @@ const InfoCompra = () => {
                 <Text style={styles.inputLabel}>Número de Tarjeta</Text>
                 <TextInput 
                   style={getInputStyle('numeroTarjeta')}
-                  placeholder="1234 5678 9012 3456"
+                  placeholder="5367-5555-9012-3456"
                   placeholderTextColor="#999"
                   keyboardType="numeric"
                   value={formData.numeroTarjeta}
@@ -436,7 +480,7 @@ const InfoCompra = () => {
                     handleInputChange('numeroTarjeta', value);
                     setErrors(prev => ({...prev, numeroTarjeta: null}));
                   }}
-                  maxLength={16}
+                  maxLength={19}
                 />
                 {errors.numeroTarjeta && (
                   <Text style={styles.errorText}>{errors.numeroTarjeta}</Text>
@@ -454,7 +498,7 @@ const InfoCompra = () => {
                     value={formData.vencimiento}
                     onChangeText={(value) => {
                       // Eliminar la barra diagonal al procesar el input
-                      const numericValue = value.replace('/', '');
+                      const numericValue = value.replace(/\//g, '');
                       handleInputChange('vencimiento', numericValue);
                       setErrors(prev => ({...prev, vencimiento: null}));
                     }}
@@ -488,6 +532,37 @@ const InfoCompra = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Modal de agradecimiento */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showThankYouModal}
+        onRequestClose={() => setShowThankYouModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Icon name="check-circle" size={60} color="#4CAF50" />
+            <Text style={styles.modalTitle}>¡Gracias por tu compra!</Text>
+            <Text style={styles.modalText}>
+              Tu pedido ha sido procesado correctamente
+            </Text>
+            <View style={styles.loadingBar}>
+              <Animated.View 
+                style={[
+                  styles.loadingProgress,
+                  {
+                    width: progressAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0%', '100%'],
+                    }),
+                  },
+                ]} 
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -737,6 +812,63 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e0e0e0',
     alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: isMobile ? '85%' : '40%',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 20,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  loadingBar: {
+    width: '100%',
+    height: 4,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  loadingProgress: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#4CAF50',
+    borderRadius: 2,
+    animation: 'slide 5s linear',
+  },
+  '@keyframes slide': {
+    from: {
+      width: '0%',
+    },
+    to: {
+      width: '100%',
+    },
   },
 });
 
