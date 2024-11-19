@@ -3,13 +3,19 @@ import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Pressable }
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-const Header = () => {
+const Header = ({ onSearch }) => {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation();
 
   const handleNavigation = (screen) => {
     setMenuVisible(false);
     navigation.navigate(screen);
+  };
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    onSearch(text);
   };
 
   return (
@@ -40,8 +46,13 @@ const Header = () => {
             style={styles.searchInput}
             placeholder="¿Qué zapatilla buscas?"
             placeholderTextColor="#666"
+            value={searchQuery}
+            onChangeText={handleSearch}
           />
-          <TouchableOpacity style={styles.searchButton}>
+          <TouchableOpacity 
+            style={styles.searchButton}
+            onPress={() => onSearch(searchQuery)}
+          >
             <Ionicons name="search" size={26} color="#007AFF" />
           </TouchableOpacity>
         </View>
