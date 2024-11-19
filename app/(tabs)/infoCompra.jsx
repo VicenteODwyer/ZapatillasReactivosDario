@@ -159,8 +159,17 @@ const InfoCompra = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('carrito')}>
-          <Icon name="arrow-back" size={28} color="#000" />
+        <TouchableOpacity 
+          style={{ marginLeft: 10 }}
+          onPress={() => navigation.navigate('carrito')}
+        >
+          <Icon name="arrow-back" size={32} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={{ marginLeft: 35 }} 
+          onPress={() => navigation.navigate('index')}
+        >
+          <Icon name="home" size={32} color="#000" />
         </TouchableOpacity>
         <View style={styles.progressContainer}>
           <View style={styles.stepContainer}>

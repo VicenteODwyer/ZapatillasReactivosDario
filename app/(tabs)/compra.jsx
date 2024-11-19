@@ -335,13 +335,13 @@ const Compra = () => {
               <Text style={{ 
                 fontSize: 16, 
                 fontWeight: '600',
-                color: '#666'
+                color: '#666',
               }}>
                 ✕
               </Text>
             </Pressable>
 
-            <Text style={{ fontSize: 18, fontWeight: '500' }}>
+            <Text style={{ fontSize: 18, fontWeight: '500', marginBottom: 20 }}>
               El producto fue agregado al carrito
             </Text>
             

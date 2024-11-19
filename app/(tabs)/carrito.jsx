@@ -6,7 +6,7 @@ import Header from '../../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 const Carrito = () => {
   const navigation = useNavigation();
@@ -65,7 +65,13 @@ const Carrito = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={28} color="#000" />
+          <Icon name="arrow-back" size={32} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('index')} 
+          style={styles.homeButton}
+        >
+          <Icon name="home" size={32} color="#000" />
         </TouchableOpacity>
         <View style={styles.progressContainer}>
           <View style={styles.stepContainer}>
@@ -84,8 +90,11 @@ const Carrito = () => {
         </View>
       </View>
 
-      <View style={styles.mainContainer}>
-        <View style={styles.productsColumn}>
+      <View style={[styles.mainContainer, Platform.OS === 'web' ? styles.webMainContainer : styles.mobileMainContainer]}>
+        <View style={[
+          styles.productsColumn,
+          Platform.OS === 'web' ? styles.webProductsColumn : styles.mobileProductsColumn
+        ]}>
           <ScrollView style={styles.productsList}>
             {productos.map((producto) => (
               <View key={producto.id} style={styles.productCard}>
@@ -122,7 +131,10 @@ const Carrito = () => {
           </ScrollView>
         </View>
 
-        <View style={styles.summaryColumn}>
+        <View style={[
+          styles.summaryColumn,
+          Platform.OS === 'web' ? styles.webSummaryColumn : styles.mobileSummaryColumn
+        ]}>
           <View style={styles.summaryCard}>
             <View style={styles.titleContainer}>
               <Text style={styles.cartTitle}>
@@ -183,8 +195,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: Platform.OS === 'web' ? 16 : 10,
+    paddingVertical: Platform.OS === 'web' ? 12 : 8,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
@@ -233,39 +245,82 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    flexDirection: 'row',
     paddingVertical: 20,
-    paddingHorizontal: 30,
     backgroundColor: '#fff',
-    marginHorizontal: 20,
     marginVertical: 20,
     borderRadius: 10,
   },
+  
+  // Estilos específicos para web
+  webMainContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 30,
+    marginHorizontal: 20,
+  },
+  
+  // Estilos específicos para móvil
+  mobileMainContainer: {
+    flexDirection: 'column',
+    paddingHorizontal: 15,
+    marginHorizontal: 10,
+  },
+
   productsColumn: {
-    flex: 2,
     gap: 20,
   },
-  summaryColumn: {
+
+  webProductsColumn: {
+    flex: 2,
+  },
+
+  mobileProductsColumn: {
     flex: 1,
   },
-  productCard: {
-    flexDirection: 'row',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+
+  summaryColumn: {
+    marginTop: Platform.OS === 'web' ? 0 : 20,
   },
-  productImage: {
-    width: 100,
-    height: 100,
-    resizeMode: 'contain',
-    borderRadius: 8,
-  },
-  productDetails: {
+
+  webSummaryColumn: {
     flex: 1,
     marginLeft: 20,
   },
+
+  mobileSummaryColumn: {
+    flex: 0,
+  },
+
+  productCard: {
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    padding: Platform.OS === 'web' ? 20 : 15,
+    borderRadius: Platform.OS === 'web' ? 0 : 12,
+    marginBottom: Platform.OS === 'web' ? 0 : 15,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+
+  productImage: {
+    width: Platform.OS === 'web' ? 100 : '100%',
+    height: Platform.OS === 'web' ? 100 : 250,
+    resizeMode: 'contain',
+    backgroundColor: '#f9f9f9',
+    borderRadius: Platform.OS === 'web' ? 8 : 12,
+  },
+
+  productDetails: {
+    flex: 1,
+    marginLeft: Platform.OS === 'web' ? 20 : 0,
+    marginTop: Platform.OS === 'web' ? 0 : 15,
+    alignItems: Platform.OS === 'web' ? 'flex-start' : 'center',
+  },
+
   productTitle: {
     fontSize: 16,
     fontWeight: '600',
@@ -281,6 +336,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 12,
+    justifyContent: Platform.OS === 'web' ? 'flex-start' : 'center',
+    width: '100%',
   },
   quantityButton: {
     width: 28,
@@ -306,29 +363,39 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     marginLeft: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: Platform.OS === 'web' ? 6 : 8,
+    paddingHorizontal: Platform.OS === 'web' ? 12 : 15,
+    backgroundColor: '#fff0f0',
+    borderRadius: 20,
   },
   deleteText: {
     color: '#ff4646',
-    fontSize: 14,
+    fontSize: Platform.OS === 'web' ? 14 : 15,
     fontWeight: '500',
   },
   price: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: Platform.OS === 'web' ? 16 : 18,
+    fontWeight: '700',
     color: '#333',
-    minWidth: 90,
-    textAlign: 'right',
+    minWidth: Platform.OS === 'web' ? 90 : '100%',
+    textAlign: Platform.OS === 'web' ? 'right' : 'center',
+    marginTop: Platform.OS === 'web' ? 0 : 10,
   },
   summaryCard: {
-    padding: 20,
+    padding: Platform.OS === 'web' ? 20 : 12,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: Platform.OS === 'web' ? 8 : 12,
+    borderWidth: Platform.OS === 'web' ? 1 : 0,
     borderColor: '#eee',
-    position: 'sticky',
-    top: 20,
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   summaryTitle: {
     fontSize: 18,
@@ -339,11 +406,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
-    paddingVertical: 4,
+    marginBottom: Platform.OS === 'web' ? 12 : 8,
+    paddingVertical: Platform.OS === 'web' ? 4 : 2,
   },
   summaryText: {
-    fontSize: 15,
+    fontSize: Platform.OS === 'web' ? 15 : 14,
     color: '#666',
   },
   freeShipping: {
@@ -358,16 +425,16 @@ const styles = StyleSheet.create({
   totalRow: {
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    paddingTop: 15,
-    marginTop: 10,
+    paddingTop: Platform.OS === 'web' ? 15 : 10,
+    marginTop: Platform.OS === 'web' ? 10 : 8,
   },
   totalText: {
-    fontSize: 16,
+    fontSize: Platform.OS === 'web' ? 16 : 14,
     fontWeight: '600',
     color: '#333',
   },
   totalAmount: {
-    fontSize: 20,
+    fontSize: Platform.OS === 'web' ? 20 : 18,
     fontWeight: '700',
     color: '#333',
   },
@@ -390,44 +457,55 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
     borderRadius: 25,
     paddingHorizontal: 15,
-    paddingVertical: 10,
-    fontSize: 14,
+    paddingVertical: Platform.OS === 'web' ? 10 : 12,
+    fontSize: Platform.OS === 'web' ? 14 : 16,
+    backgroundColor: '#f9f9f9',
   },
   calculateButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: Platform.OS === 'web' ? 10 : 12,
     borderRadius: 25,
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    alignItems: 'center',
+    minWidth: Platform.OS === 'web' ? 'auto' : 100,
   },
   checkoutButton: {
     backgroundColor: '#ff4646',
-    padding: 15,
+    padding: Platform.OS === 'web' ? 15 : 16,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 20,
+    shadowColor: '#ff4646',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   checkoutButtonText: {
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '600',
+    fontSize: Platform.OS === 'web' ? 15 : 16,
   },
   titleContainer: {
-    paddingHorizontal: 30,
-    paddingVertical: 20,
+    paddingHorizontal: Platform.OS === 'web' ? 30 : 15,
+    paddingVertical: Platform.OS === 'web' ? 20 : 10,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
     backgroundColor: '#fff',
   },
   cartTitle: {
-    fontSize: 24,
+    fontSize: Platform.OS === 'web' ? 24 : 18,
     fontWeight: '600',
     color: '#333',
-    letterSpacing: -0.5,
+    textAlign: Platform.OS === 'web' ? 'left' : 'center',
+    marginBottom: Platform.OS === 'web' ? 0 : 5,
   },
   productCount: {
-    fontSize: 20,
+    fontSize: Platform.OS === 'web' ? 20 : 16,
     fontWeight: '400',
     color: '#666',
   },
