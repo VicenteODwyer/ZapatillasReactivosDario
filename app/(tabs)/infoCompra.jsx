@@ -205,14 +205,27 @@ const InfoCompra = () => {
     }).start();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateForm()) {
-      setShowThankYouModal(true);
-      startProgressAnimation();
-      setTimeout(() => {
-        setShowThankYouModal(false);
-        navigation.navigate('index');
-      }, 5000);
+      try {
+        // Limpiar el carrito
+        await AsyncStorage.removeItem('carrito');
+        
+        // Mostrar modal y navegar
+        setShowThankYouModal(true);
+        startProgressAnimation();
+        setTimeout(() => {
+          setShowThankYouModal(false);
+          navigation.navigate('index');
+        }, 5000);
+      } catch (error) {
+        console.error('Error al limpiar el carrito:', error);
+        Alert.alert(
+          "Error",
+          "Hubo un problema al procesar tu compra",
+          [{ text: "OK" }]
+        );
+      }
     } else {
       Alert.alert(
         "Error",
