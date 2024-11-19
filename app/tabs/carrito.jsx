@@ -80,84 +80,94 @@ const Carrito = () => {
         </View>
       </View>
 
-      <ScrollView style={styles.content}>
-        <Text style={styles.cartTitle}>
-          Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
-        </Text>
+      <View style={styles.mainContainer}>
+        <View style={styles.productsColumn}>
+          <Text style={styles.cartTitle}>
+            Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
+          </Text>
+          <ScrollView style={styles.productsList}>
+            {productos.map((producto) => (
+              <View key={producto.id} style={styles.productCard}>
+                <Image source={producto.imagen} style={styles.productImage} />
+                <View style={styles.productDetails}>
+                  <Text style={styles.productTitle}>{producto.nombre}</Text>
+                  <Text style={styles.productSpec}>Talla: {producto.talle}</Text>
+                  <Text style={styles.productSpec}>Color: {producto.color}</Text>
+                  <View style={styles.quantityControls}>
+                    <TouchableOpacity 
+                      style={styles.quantityButton}
+                      onPress={() => handleCantidadChange(producto.id, Math.max(1, producto.cantidad - 1))}
+                    >
+                      <Text style={styles.quantityButtonText}>−</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.quantity}>{producto.cantidad}</Text>
+                    <TouchableOpacity 
+                      style={styles.quantityButton}
+                      onPress={() => handleCantidadChange(producto.id, producto.cantidad + 1)}
+                    >
+                      <Text style={styles.quantityButtonText}>+</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      onPress={() => handleEliminarProducto(producto.id)}
+                      style={styles.deleteButton}
+                    >
+                      <Text style={styles.deleteText}>Eliminar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <Text style={styles.price}>${producto.precio.toLocaleString()}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
 
-        {productos.map((producto) => (
-          <View key={producto.id} style={styles.productCard}>
-            <Image source={producto.imagen} style={styles.productImage} />
-            <View style={styles.productDetails}>
-              <Text style={styles.productTitle}>{producto.nombre}</Text>
-              <Text style={styles.productSpec}>Talla: {producto.talle}</Text>
-              <Text style={styles.productSpec}>Color: {producto.color}</Text>
-              <View style={styles.quantityControls}>
-                <TouchableOpacity style={styles.quantityButton}>
-                  <Text style={styles.quantityButtonText}>−</Text>
-                </TouchableOpacity>
-                <Text style={styles.quantity}>{producto.cantidad}</Text>
-                <TouchableOpacity style={styles.quantityButton}>
-                  <Text style={styles.quantityButtonText}>+</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  onPress={() => handleEliminarProducto(producto.id)}
-                  style={styles.deleteButton}
-                >
-                  <Icon name="delete-outline" size={16} color="#ff0000" />
-                  <Text style={styles.deleteText}>Eliminar</Text>
+        <View style={styles.summaryColumn}>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryTitle}>Resumen de Compra</Text>
+            
+            <View style={styles.summaryRow}>
+              <Text>Subtotal</Text>
+              <Text>${calcularSubtotal().toLocaleString()}</Text>
+            </View>
+            
+            <View style={styles.summaryRow}>
+              <Text>Envío</Text>
+              <Text style={styles.freeShipping}>¡Gratis! 🎁</Text>
+            </View>
+            
+            <View style={[styles.summaryRow, styles.totalRow]}>
+              <Text>Total</Text>
+              <Text>${calcularSubtotal().toLocaleString()}</Text>
+            </View>
+
+            <View style={styles.shippingSection}>
+              <Text style={styles.shippingTitle}>
+                <Icon name="location-on" size={16} color="#000" /> Calcular tiempo de envío
+              </Text>
+              <View style={styles.postalCodeRow}>
+                <TextInput
+                  placeholder="Ingresa tu código postal"
+                  value={codigoPostal}
+                  onChangeText={setCodigoPostal}
+                  style={styles.postalCodeInput}
+                />
+                <TouchableOpacity style={styles.calculateButton}>
+                  <Text>Calcular</Text>
                 </TouchableOpacity>
               </View>
             </View>
-            <Text style={styles.price}>${producto.precio.toLocaleString()}</Text>
-          </View>
-        ))}
 
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Resumen de Compra</Text>
-          
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>${calcularSubtotal().toLocaleString()}</Text>
+            <TouchableOpacity 
+              style={styles.checkoutButton}
+              onPress={() => navigation.navigate('infoCompra')}
+            >
+              <Text style={styles.checkoutButtonText}>
+                Continuar con la compra
+              </Text>
+            </TouchableOpacity>
           </View>
-          
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Envío</Text>
-            <Text style={styles.freeShipping}>¡Gratis! 🎁</Text>
-          </View>
-          
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>${calcularSubtotal().toLocaleString()}</Text>
-          </View>
-
-          <View style={styles.shippingSection}>
-            <Text style={styles.shippingTitle}>
-              <Icon name="location-on" size={16} color="#000" /> Calcular tiempo de envío
-            </Text>
-            <View style={styles.postalCodeRow}>
-              <TextInput
-                placeholder="Ingresa tu código postal"
-                value={codigoPostal}
-                onChangeText={setCodigoPostal}
-                style={styles.postalCodeInput}
-              />
-              <TouchableOpacity style={styles.calculateButton}>
-                <Text style={styles.calculateButtonText}>Calcular</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <TouchableOpacity 
-            style={styles.checkoutButton}
-            onPress={() => navigation.navigate('infoCompra')}
-          >
-            <Text style={styles.checkoutButtonText}>
-              Continuar con la compra <Icon name="arrow-forward" size={16} color="#fff" />
-            </Text>
-          </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 };
@@ -235,39 +245,56 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: '#999',
   },
-  content: {
-    padding: 20,
+  mainContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    backgroundColor: '#fff',
+    marginHorizontal: 30,
+    marginVertical: 50,
+    borderRadius: 20,
   },
-  cartTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 20,
+  productsColumn: {
+    flex: 3,
+    paddingRight: 30,
+    borderRightWidth: 1,
+    borderRightColor: '#eee',
   },
-  productCount: {
-    color: '#666',
-    fontSize: 20,
+  productsList: {
+    flex: 1,
+    scrollbarWidth: 'thin',
+    scrollbarColor: '#ff4646 #f0f0f0',
+    '&::-webkit-scrollbar': {
+      width: '8px',
+    },
+    '&::-webkit-scrollbar-track': {
+      backgroundColor: '#f0f0f0',
+      borderRadius: '4px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: '#ff4646',
+      borderRadius: '4px',
+    },
   },
   productCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 15,
     flexDirection: 'row',
+    marginBottom: 10,
+    marginLeft: 10,
+    padding: 12,
+    paddingHorizontal: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 15,
-    elevation: 2,
   },
   productImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 4,
+    width: 90,
+    height: 90,
+    borderRadius: 8,
   },
   productDetails: {
     flex: 1,
-    marginLeft: 15,
+    marginLeft: 20,
   },
   productTitle: {
     fontSize: 16,
@@ -285,43 +312,44 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   quantityButton: {
-    width: 30,
-    height: 30,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-    borderRadius: 15,
+    width: 28,
+    height: 28,
+    borderWidth: 1,
+    borderColor: '#ff4646',
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+  },
+  quantityButtonText: {
+    fontSize: 16,
   },
   quantity: {
-    marginHorizontal: 12,
+    marginHorizontal: 15,
+    fontSize: 15,
   },
   deleteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 'auto',
+    marginLeft: 20,
   },
   deleteText: {
-    color: '#ff0000',
-    marginLeft: 4,
+    color: '#ff4646',
     fontSize: 14,
+    fontWeight: '600',
   },
   price: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
-    marginLeft: 15,
+    minWidth: 80,
+    textAlign: 'right',
+    marginRight: 35,
+  },
+  summaryColumn: {
+    flex: 2,
+    paddingLeft: 30,
   },
   summaryCard: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 25,
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 15,
-    elevation: 2,
+    padding: 20,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
   },
   summaryTitle: {
     fontSize: 20,
@@ -370,21 +398,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkoutButton: {
-    backgroundColor: '#000',
-    borderRadius: 15,
-    paddingVertical: 18,
+    backgroundColor: '#ff4646',
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    marginTop: 20,
   },
   checkoutButtonText: {
     color: '#fff',
-    fontSize: 16,
     fontWeight: '500',
+  },
+  cartTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 15,
+    paddingLeft: 10,
+  },
+  productCount: {
+    fontWeight: '400',
   },
 });
 
