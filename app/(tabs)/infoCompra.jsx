@@ -57,7 +57,6 @@ const InfoCompra = () => {
   }, []);
 
   const handleInputChange = (name, value) => {
-    // Aplicar límites según el campo
     let limitedValue = value;
     
     switch (name) {
@@ -65,7 +64,22 @@ const InfoCompra = () => {
         limitedValue = value.replace(/\D/g, '').slice(0, 16);
         break;
       case 'vencimiento':
-        limitedValue = value.replace(/\D/g, '').slice(0, 4);
+        // Eliminar caracteres no numéricos
+        limitedValue = value.replace(/\D/g, '');
+        
+        // Validar el mes (primeros dos dígitos)
+        if (limitedValue.length >= 2) {
+          const month = parseInt(limitedValue.substring(0, 2));
+          if (month > 12) {
+            // Si el mes es inválido, solo mantener el primer dígito
+            limitedValue = limitedValue.substring(0, 1);
+          }
+        }
+        
+        // Formatear como MM/YY
+        if (limitedValue.length >= 2) {
+          limitedValue = limitedValue.substring(0, 2) + '/' + limitedValue.substring(2, 4);
+        }
         break;
       case 'cvv':
         limitedValue = value.replace(/\D/g, '').slice(0, 3);
@@ -78,7 +92,23 @@ const InfoCompra = () => {
         limitedValue = value.replace(/\D/g, '').slice(0, 5);
         break;
       case 'telefono':
-        limitedValue = value.replace(/\D/g, '').slice(0, 10);
+        // Eliminar todo excepto números
+        const numericValue = value.replace(/\D/g, '');
+        
+        // Si no hay números, devolver string vacío
+        if (numericValue.length === 0) {
+          limitedValue = '';
+        }
+        // Formatear el número según el patrón
+        else if (numericValue.length <= 2) {
+          limitedValue = `+${numericValue}`;
+        } else if (numericValue.length <= 5) {
+          limitedValue = `+${numericValue.slice(0, 2)} (${numericValue.slice(2)}`;
+        } else if (numericValue.length <= 9) {
+          limitedValue = `+${numericValue.slice(0, 2)} (${numericValue.slice(2, 5)}) ${numericValue.slice(5)}`;
+        } else {
+          limitedValue = `+${numericValue.slice(0, 2)} (${numericValue.slice(2, 5)}) ${numericValue.slice(5, 9)}-${numericValue.slice(9, 13)}`;
+        }
         break;
       default:
         limitedValue = value;
@@ -121,6 +151,14 @@ const InfoCompra = () => {
     }
 
     setErrors(newErrors);
+    
+    // Limpiar errores después de 3 segundos
+    if (Object.keys(newErrors).length > 0) {
+      setTimeout(() => {
+        setErrors({});
+      }, 7000);
+    }
+    
     return Object.keys(newErrors).length === 0;
   };
 
@@ -314,15 +352,15 @@ const InfoCompra = () => {
                 <Text style={styles.inputLabel}>Teléfono</Text>
                 <TextInput 
                   style={getInputStyle('telefono')}
-                  placeholder="+54 (11) 1234-5678"
+                  placeholder="+54 (111) 1234-5678"
                   placeholderTextColor="#999"
-                  keyboardType="phone-pad"
+                  keyboardType="numeric"
                   value={formData.telefono}
                   onChangeText={(value) => {
                     handleInputChange('telefono', value);
                     setErrors(prev => ({...prev, telefono: null}));
                   }}
-                  maxLength={10}
+                  maxLength={20}
                 />
                 {errors.telefono && (
                   <Text style={styles.errorText}>{errors.telefono}</Text>
@@ -412,10 +450,12 @@ const InfoCompra = () => {
                     keyboardType="numeric"
                     value={formData.vencimiento}
                     onChangeText={(value) => {
-                      handleInputChange('vencimiento', value);
+                      // Eliminar la barra diagonal al procesar el input
+                      const numericValue = value.replace('/', '');
+                      handleInputChange('vencimiento', numericValue);
                       setErrors(prev => ({...prev, vencimiento: null}));
                     }}
-                    maxLength={4}
+                    maxLength={5}
                   />
                   {errors.vencimiento && (
                     <Text style={styles.errorText}>{errors.vencimiento}</Text>
