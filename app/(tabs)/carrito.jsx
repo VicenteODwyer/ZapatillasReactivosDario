@@ -69,14 +69,14 @@ const Carrito = () => {
         </TouchableOpacity>
         <View style={styles.progressContainer}>
           <View style={styles.stepContainer}>
-            <View style={styles.cartIconContainer}>
+            <View style={[styles.iconContainer, styles.activeIcon]}>
               <Icon name="shopping-cart" size={24} color="#fff" />
             </View>
-            <Text style={styles.stepText}>Carrito</Text>
+            <Text style={[styles.stepText, styles.activeText]}>Carrito</Text>
           </View>
           <View style={styles.progressLine} />
           <View style={styles.stepContainer}>
-            <View style={styles.paymentIconContainer}>
+            <View style={[styles.iconContainer, styles.inactiveIcon]}>
               <Icon name="payment" size={24} color="#999" />
             </View>
             <Text style={styles.stepText}>Pago</Text>
@@ -84,24 +84,15 @@ const Carrito = () => {
         </View>
       </View>
 
-      <View style={styles.titleContainer}>
-        <Text style={styles.cartTitle}>
-          Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
-        </Text>
-      </View>
-
       <View style={styles.mainContainer}>
         <View style={styles.productsColumn}>
-          <Text style={styles.cartTitle}>
-            Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
-          </Text>
           <ScrollView style={styles.productsList}>
             {productos.map((producto) => (
               <View key={producto.id} style={styles.productCard}>
                 <Image source={producto.imagen} style={styles.productImage} />
                 <View style={styles.productDetails}>
                   <Text style={styles.productTitle}>{producto.nombre}</Text>
-                  <Text style={styles.productSpec}>Talla: {producto.talle}</Text>
+                  <Text style={styles.productSpec}>Talle: {producto.talle}</Text>
                   <Text style={styles.productSpec}>Color: {producto.color}</Text>
                   <View style={styles.quantityControls}>
                     <TouchableOpacity 
@@ -133,21 +124,25 @@ const Carrito = () => {
 
         <View style={styles.summaryColumn}>
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Resumen de Compra</Text>
+            <View style={styles.titleContainer}>
+              <Text style={styles.cartTitle}>
+                Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
+              </Text>
+            </View>
             
             <View style={styles.summaryRow}>
-              <Text>Subtotal</Text>
+              <Text style={styles.summaryText}>Subtotal</Text>
               <Text>${calcularSubtotal().toLocaleString()}</Text>
             </View>
             
             <View style={styles.summaryRow}>
-              <Text>Envío</Text>
+              <Text style={styles.summaryText}>Envío</Text>
               <Text style={styles.freeShipping}>¡Gratis! 🎁</Text>
             </View>
             
             <View style={[styles.summaryRow, styles.totalRow]}>
-              <Text>Total</Text>
-              <Text>${calcularSubtotal().toLocaleString()}</Text>
+              <Text style={styles.totalText}>Total</Text>
+              <Text style={styles.totalAmount}>${calcularSubtotal().toLocaleString()}</Text>
             </View>
 
             <View style={styles.shippingSection}>
@@ -169,17 +164,9 @@ const Carrito = () => {
 
             <TouchableOpacity 
               style={styles.checkoutButton}
-              onPress={() => {
-                const montoTotal = calcularSubtotal();
-                console.log('Monto total a enviar:', montoTotal);
-                navigation.navigate('infoCompra', {
-                  montoTotal: montoTotal
-                });
-              }}
+              onPress={() => navigation.navigate('infoCompra', { montoTotal: calcularSubtotal() })}
             >
-              <Text style={styles.checkoutButtonText}>
-                Continuar con la compra
-              </Text>
+              <Text style={styles.checkoutButtonText}>Continuar con la compra</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -196,15 +183,15 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
   backButton: {
-    padding: 10,
-    marginRight: 15,
+    padding: 8,
+    marginRight: 16,
   },
   progressContainer: {
     flex: 1,
@@ -215,56 +202,34 @@ const styles = StyleSheet.create({
   stepContainer: {
     alignItems: 'center',
   },
-  cartIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#ff4646',
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    marginBottom: 4,
   },
-  paymentIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  activeIcon: {
+    backgroundColor: '#ff4646',
+  },
+  inactiveIcon: {
     backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   progressLine: {
-    width: 100,
+    width: 80,
     height: 2,
     backgroundColor: '#e0e0e0',
-    marginHorizontal: 15,
+    marginHorizontal: 16,
   },
   stepText: {
     fontSize: 14,
+    color: '#999',
+    marginTop: 6,
+  },
+  activeText: {
+    color: '#000',
     fontWeight: '500',
-    color: '#333',
-    marginTop: 8,
-  },
-  titleContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  cartTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  productCount: {
-    fontWeight: '400',
-    color: '#666',
   },
   mainContainer: {
     flex: 1,
@@ -277,41 +242,25 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   productsColumn: {
-    flex: 3,
-    paddingRight: 30,
-    borderRightWidth: 1,
-    borderRightColor: '#eee',
+    flex: 2,
+    gap: 20,
   },
-  productsList: {
+  summaryColumn: {
     flex: 1,
-    scrollbarWidth: 'thin',
-    scrollbarColor: '#ff4646 #f0f0f0',
-    '&::-webkit-scrollbar': {
-      width: '8px',
-    },
-    '&::-webkit-scrollbar-track': {
-      backgroundColor: '#f0f0f0',
-      borderRadius: '4px',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: '#ff4646',
-      borderRadius: '4px',
-    },
   },
   productCard: {
     flexDirection: 'row',
-    marginBottom: 15,
-    marginLeft: 0,
-    padding: 15,
-    paddingHorizontal: 10,
+    padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
   productImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 5,
+    width: 100,
+    height: 100,
+    resizeMode: 'contain',
+    borderRadius: 8,
   },
   productDetails: {
     flex: 1,
@@ -319,54 +268,58 @@ const styles = StyleSheet.create({
   },
   productTitle: {
     fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 4,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 6,
   },
   productSpec: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 12,
   },
   quantityButton: {
-    width: 24,
-    height: 24,
-    borderWidth: 1,
-    borderColor: '#ff4646',
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   quantityButtonText: {
     fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
   },
   quantity: {
-    marginHorizontal: 15,
     fontSize: 15,
+    fontWeight: '500',
+    marginHorizontal: 15,
+    minWidth: 20,
+    textAlign: 'center',
   },
   deleteButton: {
     marginLeft: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
   },
   deleteText: {
     color: '#ff4646',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   price: {
-    fontSize: 15,
-    fontWeight: '500',
-    minWidth: 80,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    minWidth: 90,
     textAlign: 'right',
-    marginRight: 35,
-  },
-  summaryColumn: {
-    flex: 2,
-    paddingLeft: 30,
   },
   summaryCard: {
     padding: 20,
@@ -374,36 +327,62 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#eee',
+    position: 'sticky',
+    top: 20,
   },
   summaryTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingVertical: 4,
+  },
+  summaryText: {
+    fontSize: 15,
+    color: '#666',
+  },
+  freeShipping: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2ECC71', // Verde más bonito
+    backgroundColor: '#E8F8F5', // Fondo verde claro
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   totalRow: {
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    paddingTop: 10,
-    marginTop: 5,
+    paddingTop: 15,
+    marginTop: 10,
   },
-  freeShipping: {
-    color: '#00b300',
+  totalText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  totalAmount: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#333',
   },
   shippingSection: {
     marginTop: 20,
   },
   shippingTitle: {
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: '500',
     marginBottom: 10,
   },
   postalCodeRow: {
     flexDirection: 'row',
     gap: 10,
+    marginTop: 10,
   },
   postalCodeInput: {
     flex: 1,
@@ -433,6 +412,24 @@ const styles = StyleSheet.create({
   checkoutButtonText: {
     color: '#fff',
     fontWeight: '500',
+  },
+  titleContainer: {
+    paddingHorizontal: 30,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#fff',
+  },
+  cartTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#333',
+    letterSpacing: -0.5,
+  },
+  productCount: {
+    fontSize: 20,
+    fontWeight: '400',
+    color: '#666',
   },
 });
 

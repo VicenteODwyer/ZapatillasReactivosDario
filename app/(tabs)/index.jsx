@@ -102,7 +102,10 @@ const Home = () => {
                         <Pressable
                             key={zapatilla.id}
                             style={styles.card}
-                            onPress={() => navigation.navigate('compra', { zapatilla })}
+                            onPress={() => {
+                                console.log('Intentando navegar a compra con:', zapatilla);
+                                navigation.navigate('compra', { zapatilla });
+                            }}
                         >
                             <View style={styles.cardContent}>
                                 <View style={styles.imageContainer}>
