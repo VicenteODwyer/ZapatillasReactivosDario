@@ -42,7 +42,7 @@ function App() {
         />
         <Stack.Screen 
           name="Compra" 
-          component={CompraScreen}
+          component={Compra}
           options={{
             header: () => <Header />
           }}

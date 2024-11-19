@@ -6,7 +6,7 @@ import Header from '../../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 const Carrito = () => {
   const navigation = useNavigation();
@@ -75,14 +75,14 @@ const Carrito = () => {
         </TouchableOpacity>
         <View style={styles.progressContainer}>
           <View style={styles.stepContainer}>
-            <View style={styles.cartIconContainer}>
+            <View style={[styles.iconContainer, styles.activeIcon]}>
               <Icon name="shopping-cart" size={24} color="#fff" />
             </View>
-            <Text style={styles.stepText}>Carrito</Text>
+            <Text style={[styles.stepText, styles.activeText]}>Carrito</Text>
           </View>
           <View style={styles.progressLine} />
           <View style={styles.stepContainer}>
-            <View style={styles.paymentIconContainer}>
+            <View style={[styles.iconContainer, styles.inactiveIcon]}>
               <Icon name="payment" size={24} color="#999" />
             </View>
             <Text style={styles.stepText}>Pago</Text>
@@ -90,19 +90,18 @@ const Carrito = () => {
         </View>
       </View>
 
-
-      <View style={styles.mainContainer}>
-        <View style={styles.productsColumn}>
-          <Text style={styles.cartTitle}>
-            Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
-          </Text>
+      <View style={[styles.mainContainer, Platform.OS === 'web' ? styles.webMainContainer : styles.mobileMainContainer]}>
+        <View style={[
+          styles.productsColumn,
+          Platform.OS === 'web' ? styles.webProductsColumn : styles.mobileProductsColumn
+        ]}>
           <ScrollView style={styles.productsList}>
             {productos.map((producto) => (
               <View key={producto.id} style={styles.productCard}>
                 <Image source={producto.imagen} style={styles.productImage} />
                 <View style={styles.productDetails}>
                   <Text style={styles.productTitle}>{producto.nombre}</Text>
-                  <Text style={styles.productSpec}>Talla: {producto.talle}</Text>
+                  <Text style={styles.productSpec}>Talle: {producto.talle}</Text>
                   <Text style={styles.productSpec}>Color: {producto.color}</Text>
                   <View style={styles.quantityControls}>
                     <TouchableOpacity 
@@ -132,23 +131,30 @@ const Carrito = () => {
           </ScrollView>
         </View>
 
-        <View style={styles.summaryColumn}>
+        <View style={[
+          styles.summaryColumn,
+          Platform.OS === 'web' ? styles.webSummaryColumn : styles.mobileSummaryColumn
+        ]}>
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Resumen de Compra</Text>
+            <View style={styles.titleContainer}>
+              <Text style={styles.cartTitle}>
+                Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
+              </Text>
+            </View>
             
             <View style={styles.summaryRow}>
-              <Text>Subtotal</Text>
+              <Text style={styles.summaryText}>Subtotal</Text>
               <Text>${calcularSubtotal().toLocaleString()}</Text>
             </View>
             
             <View style={styles.summaryRow}>
-              <Text>Envío</Text>
+              <Text style={styles.summaryText}>Envío</Text>
               <Text style={styles.freeShipping}>¡Gratis! 🎁</Text>
             </View>
             
             <View style={[styles.summaryRow, styles.totalRow]}>
-              <Text>Total</Text>
-              <Text>${calcularSubtotal().toLocaleString()}</Text>
+              <Text style={styles.totalText}>Total</Text>
+              <Text style={styles.totalAmount}>${calcularSubtotal().toLocaleString()}</Text>
             </View>
 
             <View style={styles.shippingSection}>
@@ -170,17 +176,9 @@ const Carrito = () => {
 
             <TouchableOpacity 
               style={styles.checkoutButton}
-              onPress={() => {
-                const montoTotal = calcularSubtotal();
-                console.log('Monto total a enviar:', montoTotal);
-                navigation.navigate('infoCompra', {
-                  montoTotal: montoTotal
-                });
-              }}
+              onPress={() => navigation.navigate('infoCompra', { montoTotal: calcularSubtotal() })}
             >
-              <Text style={styles.checkoutButtonText}>
-                Continuar con la compra
-              </Text>
+              <Text style={styles.checkoutButtonText}>Continuar con la compra</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -197,19 +195,15 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: Platform.OS === 'web' ? 16 : 10,
+    paddingVertical: Platform.OS === 'web' ? 12 : 8,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
   backButton: {
-    padding: 10,
-    marginRight: 15,
-  },
-  homeButton: {
-    padding: 10,
-    marginRight: 15,
+    padding: 8,
+    marginRight: 16,
   },
   progressContainer: {
     flex: 1,
@@ -220,195 +214,242 @@ const styles = StyleSheet.create({
   stepContainer: {
     alignItems: 'center',
   },
-  cartIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#ff4646',
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
+    marginBottom: 4,
+  },
+  activeIcon: {
+    backgroundColor: '#ff4646',
+  },
+  inactiveIcon: {
+    backgroundColor: '#f5f5f5',
+  },
+  progressLine: {
+    width: 80,
+    height: 2,
+    backgroundColor: '#e0e0e0',
+    marginHorizontal: 16,
+  },
+  stepText: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 6,
+  },
+  activeText: {
+    color: '#000',
+    fontWeight: '500',
+  },
+  mainContainer: {
+    flex: 1,
+    paddingVertical: 20,
+    backgroundColor: '#fff',
+    marginVertical: 20,
+    borderRadius: 10,
+  },
+  
+  // Estilos específicos para web
+  webMainContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 30,
+    marginHorizontal: 20,
+  },
+  
+  // Estilos específicos para móvil
+  mobileMainContainer: {
+    flexDirection: 'column',
+    paddingHorizontal: 15,
+    marginHorizontal: 10,
+  },
+
+  productsColumn: {
+    gap: 20,
+  },
+
+  webProductsColumn: {
+    flex: 2,
+  },
+
+  mobileProductsColumn: {
+    flex: 1,
+  },
+
+  summaryColumn: {
+    marginTop: Platform.OS === 'web' ? 0 : 20,
+  },
+
+  webSummaryColumn: {
+    flex: 1,
+    marginLeft: 20,
+  },
+
+  mobileSummaryColumn: {
+    flex: 0,
+  },
+
+  productCard: {
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    padding: Platform.OS === 'web' ? 20 : 15,
+    borderRadius: Platform.OS === 'web' ? 0 : 12,
+    marginBottom: Platform.OS === 'web' ? 0 : 15,
+    backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  paymentIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
+
+  productImage: {
+    width: Platform.OS === 'web' ? 100 : '100%',
+    height: Platform.OS === 'web' ? 100 : 250,
+    resizeMode: 'contain',
+    backgroundColor: '#f9f9f9',
+    borderRadius: Platform.OS === 'web' ? 8 : 12,
   },
-  progressLine: {
-    width: 100,
-    height: 2,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 15,
+
+  productDetails: {
+    flex: 1,
+    marginLeft: Platform.OS === 'web' ? 20 : 0,
+    marginTop: Platform.OS === 'web' ? 0 : 15,
+    alignItems: Platform.OS === 'web' ? 'flex-start' : 'center',
   },
-  stepText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    marginTop: 8,
-  },
-  titleContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  cartTitle: {
+
+  productTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-  },
-  productCount: {
-    fontWeight: '400',
-    color: '#666',
-  },
-  mainContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingVertical: 20,
-    paddingHorizontal: 30,
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginVertical: 20,
-    borderRadius: 10,
-  },
-  productsColumn: {
-    flex: 3,
-    paddingRight: 30,
-    borderRightWidth: 1,
-    borderRightColor: '#eee',
-  },
-  productsList: {
-    flex: 1,
-    scrollbarWidth: 'thin',
-    scrollbarColor: '#ff4646 #f0f0f0',
-    '&::-webkit-scrollbar': {
-      width: '8px',
-    },
-    '&::-webkit-scrollbar-track': {
-      backgroundColor: '#f0f0f0',
-      borderRadius: '4px',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: '#ff4646',
-      borderRadius: '4px',
-    },
-  },
-  productCard: {
-    flexDirection: 'row',
-    marginBottom: 15,
-    marginLeft: 0,
-    padding: 15,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    alignItems: 'center',
-  },
-  productImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 5,
-  },
-  productDetails: {
-    flex: 1,
-    marginLeft: 20,
-  },
-  productTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   productSpec: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 12,
+    justifyContent: Platform.OS === 'web' ? 'flex-start' : 'center',
+    width: '100%',
   },
   quantityButton: {
-    width: 24,
-    height: 24,
-    borderWidth: 1,
-    borderColor: '#ff4646',
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   quantityButtonText: {
     fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
   },
   quantity: {
-    marginHorizontal: 15,
     fontSize: 15,
+    fontWeight: '500',
+    marginHorizontal: 15,
+    minWidth: 20,
+    textAlign: 'center',
   },
   deleteButton: {
     marginLeft: 20,
+    paddingVertical: Platform.OS === 'web' ? 6 : 8,
+    paddingHorizontal: Platform.OS === 'web' ? 12 : 15,
+    backgroundColor: '#fff0f0',
+    borderRadius: 20,
   },
   deleteText: {
     color: '#ff4646',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: Platform.OS === 'web' ? 14 : 15,
+    fontWeight: '500',
   },
   price: {
-    fontSize: 15,
-    fontWeight: '500',
-    minWidth: 80,
-    textAlign: 'right',
-    marginRight: 35,
-  },
-  summaryColumn: {
-    flex: 2,
-    paddingLeft: 30,
+    fontSize: Platform.OS === 'web' ? 16 : 18,
+    fontWeight: '700',
+    color: '#333',
+    minWidth: Platform.OS === 'web' ? 90 : '100%',
+    textAlign: Platform.OS === 'web' ? 'right' : 'center',
+    marginTop: Platform.OS === 'web' ? 0 : 10,
   },
   summaryCard: {
-    padding: 20,
+    padding: Platform.OS === 'web' ? 20 : 12,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: Platform.OS === 'web' ? 8 : 12,
+    borderWidth: Platform.OS === 'web' ? 1 : 0,
     borderColor: '#eee',
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   summaryTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center',
+    marginBottom: Platform.OS === 'web' ? 12 : 8,
+    paddingVertical: Platform.OS === 'web' ? 4 : 2,
+  },
+  summaryText: {
+    fontSize: Platform.OS === 'web' ? 15 : 14,
+    color: '#666',
+  },
+  freeShipping: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2ECC71', // Verde más bonito
+    backgroundColor: '#E8F8F5', // Fondo verde claro
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   totalRow: {
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    paddingTop: 10,
-    marginTop: 5,
+    paddingTop: Platform.OS === 'web' ? 15 : 10,
+    marginTop: Platform.OS === 'web' ? 10 : 8,
   },
-  freeShipping: {
-    color: '#00b300',
+  totalText: {
+    fontSize: Platform.OS === 'web' ? 16 : 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  totalAmount: {
+    fontSize: Platform.OS === 'web' ? 20 : 18,
+    fontWeight: '700',
+    color: '#333',
   },
   shippingSection: {
     marginTop: 20,
   },
   shippingTitle: {
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: '500',
     marginBottom: 10,
   },
   postalCodeRow: {
     flexDirection: 'row',
     gap: 10,
+    marginTop: 10,
   },
   postalCodeInput: {
     flex: 1,
@@ -416,28 +457,57 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
     borderRadius: 25,
     paddingHorizontal: 15,
-    paddingVertical: 10,
-    fontSize: 14,
+    paddingVertical: Platform.OS === 'web' ? 10 : 12,
+    fontSize: Platform.OS === 'web' ? 14 : 16,
+    backgroundColor: '#f9f9f9',
   },
   calculateButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: Platform.OS === 'web' ? 10 : 12,
     borderRadius: 25,
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    alignItems: 'center',
+    minWidth: Platform.OS === 'web' ? 'auto' : 100,
   },
   checkoutButton: {
     backgroundColor: '#ff4646',
-    padding: 15,
+    padding: Platform.OS === 'web' ? 15 : 16,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 20,
+    shadowColor: '#ff4646',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   checkoutButtonText: {
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '600',
+    fontSize: Platform.OS === 'web' ? 15 : 16,
+  },
+  titleContainer: {
+    paddingHorizontal: Platform.OS === 'web' ? 30 : 15,
+    paddingVertical: Platform.OS === 'web' ? 20 : 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#fff',
+  },
+  cartTitle: {
+    fontSize: Platform.OS === 'web' ? 24 : 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: Platform.OS === 'web' ? 'left' : 'center',
+    marginBottom: Platform.OS === 'web' ? 0 : 5,
+  },
+  productCount: {
+    fontSize: Platform.OS === 'web' ? 20 : 16,
+    fontWeight: '400',
+    color: '#666',
   },
 });
 
