@@ -6,7 +6,6 @@ import HomeScreen from './app/tabs/index';
 import RegisterScreen from './app/tabs/register';
 import CompraScreen from './app/tabs/compra';
 import CarritoScreen from './app/tabs/carrito';
-import InfoCompraScreen from './app/tabs/infoCompra';
 
 const Stack = createStackNavigator();
 
@@ -14,13 +13,20 @@ function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="login"
         screenOptions={{
           headerShown: false,
         }}
       >
         <Stack.Screen 
-          name="Home" 
+          name="login" 
+          component={LoginScreen}
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen 
+          name="index" 
           component={HomeScreen}
           options={{
             header: () => <Header />

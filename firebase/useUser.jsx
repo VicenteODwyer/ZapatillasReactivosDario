@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { db } from '../FirebaseConfig';
+import { db } from './FirebaseConfig';
 import { 
     collection,
     addDoc,
     getDocs,
     updateDoc,
     deleteDoc,
-    doc
+    doc,
+    setDoc
 } from 'firebase/firestore';
 
 export const useUser = () => {
@@ -17,16 +18,24 @@ export const useUser = () => {
     const usersCollectionRef = collection(db, "users");
 
     // Crear usuario
-    const createUser = async (nombre, email) => {
+    const createUser = async (userData) => {
         try {
             setLoading(true);
-            await addDoc(usersCollectionRef, {
-                nombre: nombre,
-                email: email
+            // Usar setDoc con el UID como ID del documento
+            const userRef = doc(db, "users", userData.uid);
+            await setDoc(userRef, {
+                nombre: userData.nombre,
+                email: userData.email,
+                createdAt: userData.createdAt,
+                lastLogin: userData.lastLogin,
+                role: userData.role
             });
-        getUsers(); // Actualizar lista después de crear
+            
+            await getUsers(); // Actualizar lista después de crear
+            return userRef;
         } catch (err) {
             setError(err.message);
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -50,37 +59,57 @@ export const useUser = () => {
     };
 
     // Actualizar usuario
-    const updateUser = async (id, nombre, email) => {
+    const updateUser = async (uid, userData) => {
         try {
             setLoading(true);
-            const userDoc = doc(db, "users", id);
-            await updateDoc(userDoc, {
-                nombre: nombre,
-                email: email
+            const userRef = doc(db, "users", uid);
+            await updateDoc(userRef, {
+                ...userData,
+                updatedAt: new Date().toISOString()
             });
-            getUsers(); // Actualizar lista después de modificar
+            await getUsers();
         } catch (err) {
             setError(err.message);
+            throw err;
         } finally {
             setLoading(false);
         }
     };
 
     // Eliminar usuario
-    const deleteUser = async (id) => {
+    const deleteUser = async (uid) => {
         try {
             setLoading(true);
-            const userDoc = doc(db, "users", id);
-            await deleteDoc(userDoc);
-        getUsers(); // Actualizar lista después de eliminar
+            const userRef = doc(db, "users", uid);
+            await deleteDoc(userRef);
+            await getUsers();
         } catch (err) {
             setError(err.message);
+            throw err;
         } finally {
             setLoading(false);
         }
     };
 
-    // Cargar usuarios al montar el componente
+    // Obtener un usuario específico
+    const getUserById = async (uid) => {
+        try {
+            setLoading(true);
+            const userRef = doc(db, "users", uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists()) {
+                return { id: userSnap.id, ...userSnap.data() };
+            }
+            return null;
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         getUsers();
     }, []);
@@ -91,6 +120,8 @@ export const useUser = () => {
         error,
         createUser,
         updateUser,
-        deleteUser
+        deleteUser,
+        getUsers,
+        getUserById
     };
 };
