@@ -61,24 +61,54 @@ const InfoCompra = () => {
     
     switch (name) {
       case 'numeroTarjeta':
-        limitedValue = value.replace(/\D/g, '').slice(0, 16);
+        // Eliminar caracteres no numéricos y limitar a 16 dígitos
+        const cardNumbers = value.replace(/\D/g, '').slice(0, 16);
+        
+        // Formatear con guiones cada 4 dígitos
+        const parts = [];
+        for (let i = 0; i < cardNumbers.length; i += 4) {
+          parts.push(cardNumbers.slice(i, i + 4));
+        }
+        limitedValue = parts.join('-');
         break;
       case 'vencimiento':
-        // Eliminar caracteres no numéricos
-        limitedValue = value.replace(/\D/g, '');
-        
-        // Validar el mes (primeros dos dígitos)
-        if (limitedValue.length >= 2) {
-          const month = parseInt(limitedValue.substring(0, 2));
-          if (month > 12) {
-            // Si el mes es inválido, solo mantener el primer dígito
-            limitedValue = limitedValue.substring(0, 1);
+        // Si estamos borrando
+        if (value.length < formData.vencimiento.length) {
+          // Si estamos borrando justo después de la barra
+          if (value.length === 3) {
+            limitedValue = value.substring(0, 2);
+          } else {
+            // Para cualquier otro caso de borrado, mantener el valor tal cual
+            limitedValue = value;
           }
-        }
-        
-        // Formatear como MM/YY
-        if (limitedValue.length >= 2) {
-          limitedValue = limitedValue.substring(0, 2) + '/' + limitedValue.substring(2, 4);
+        } else {
+          // Eliminar caracteres no numéricos
+          limitedValue = value.replace(/\D/g, '');
+          
+          // Validar el primer dígito del mes
+          if (limitedValue.length === 1) {
+            const firstDigit = parseInt(limitedValue);
+            if (firstDigit > 1) {
+              limitedValue = '0' + firstDigit;
+            }
+          }
+          
+          // Validar el segundo dígito del mes
+          if (limitedValue.length >= 2) {
+            const firstDigit = parseInt(limitedValue.substring(0, 1));
+            const secondDigit = parseInt(limitedValue.substring(1, 2));
+            
+            if (firstDigit === 1 && secondDigit > 2) {
+              limitedValue = limitedValue.substring(0, 1);
+            } else if (firstDigit === 0 && secondDigit === 0) {
+              limitedValue = limitedValue.substring(0, 1);
+            }
+          }
+          
+          // Formatear como MM/YY
+          if (limitedValue.length >= 2) {
+            limitedValue = limitedValue.substring(0, 2) + '/' + limitedValue.substring(2, 4);
+          }
         }
         break;
       case 'cvv':
@@ -352,7 +382,7 @@ const InfoCompra = () => {
                 <Text style={styles.inputLabel}>Teléfono</Text>
                 <TextInput 
                   style={getInputStyle('telefono')}
-                  placeholder="+54 (111) 1234-5678"
+                  placeholder="+54 (299) 1234-5678"
                   placeholderTextColor="#999"
                   keyboardType="numeric"
                   value={formData.telefono}
@@ -425,7 +455,7 @@ const InfoCompra = () => {
                 <Text style={styles.inputLabel}>Número de Tarjeta</Text>
                 <TextInput 
                   style={getInputStyle('numeroTarjeta')}
-                  placeholder="1234 5678 9012 3456"
+                  placeholder="5367-5555-9012-3456"
                   placeholderTextColor="#999"
                   keyboardType="numeric"
                   value={formData.numeroTarjeta}
@@ -433,7 +463,7 @@ const InfoCompra = () => {
                     handleInputChange('numeroTarjeta', value);
                     setErrors(prev => ({...prev, numeroTarjeta: null}));
                   }}
-                  maxLength={16}
+                  maxLength={19}
                 />
                 {errors.numeroTarjeta && (
                   <Text style={styles.errorText}>{errors.numeroTarjeta}</Text>
@@ -451,7 +481,7 @@ const InfoCompra = () => {
                     value={formData.vencimiento}
                     onChangeText={(value) => {
                       // Eliminar la barra diagonal al procesar el input
-                      const numericValue = value.replace('/', '');
+                      const numericValue = value.replace(/\//g, '');
                       handleInputChange('vencimiento', numericValue);
                       setErrors(prev => ({...prev, vencimiento: null}));
                     }}
