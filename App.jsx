@@ -6,6 +6,7 @@ import HomeScreen from './app/tabs/index';
 import RegisterScreen from './app/tabs/register';
 import CompraScreen from './app/tabs/compra';
 import CarritoScreen from './app/tabs/carrito';
+import InfoCompraScreen from './app/tabs/infoCompra';
 
 const Stack = createStackNavigator();
 
@@ -42,6 +43,13 @@ function App() {
         <Stack.Screen 
           name="Carrito" 
           component={CarritoScreen}
+          options={{
+            header: () => <Header />
+          }}
+        />
+        <Stack.Screen 
+          name="infoCompra" 
+          component={InfoCompraScreen}
           options={{
             header: () => <Header />
           }}

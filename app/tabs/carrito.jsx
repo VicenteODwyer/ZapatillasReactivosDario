@@ -54,7 +54,11 @@ const Carrito = () => {
   };
 
   const calcularSubtotal = () => {
-    return productos.reduce((total, producto) => total + (producto.precio * producto.cantidad), 0);
+    let total = 0;
+    productos.forEach(producto => {
+      total += (producto.precio * producto.cantidad);
+    });
+    return total;
   };
 
   return (
@@ -159,7 +163,13 @@ const Carrito = () => {
 
             <TouchableOpacity 
               style={styles.checkoutButton}
-              onPress={() => navigation.navigate('infoCompra')}
+              onPress={() => {
+                const montoTotal = calcularSubtotal();
+                console.log('Monto total a enviar:', montoTotal);
+                navigation.navigate('infoCompra', {
+                  montoTotal: montoTotal
+                });
+              }}
             >
               <Text style={styles.checkoutButtonText}>
                 Continuar con la compra

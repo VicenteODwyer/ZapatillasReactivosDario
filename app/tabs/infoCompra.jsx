@@ -5,6 +5,7 @@ import Header from '../../components/Header';
 import visaIcon from '../../assets/visa-icon.png';
 import mastercardIcon from '../../assets/mastercard-icon.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const InfoCompra = () => {
   const [formData, setFormData] = useState({
@@ -39,7 +40,14 @@ const InfoCompra = () => {
       }
     };
 
+    // Cargar inicial
     cargarTotal();
+
+    // Configurar un intervalo para verificar cambios
+    const interval = setInterval(cargarTotal, 1000); // Verifica cada segundo
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(interval);
   }, []);
 
   const handleInputChange = (name, value) => {
@@ -65,9 +73,29 @@ const InfoCompra = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
-      <Header />
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color="#000" style={styles.backIcon} />
+        </TouchableOpacity>
+        <View style={styles.progressBar}>
+          <View style={styles.step}>
+            <View style={styles.stepIconInactive}>
+              <Icon name="shopping-cart" size={20} color="#999" />
+            </View>
+            <Text style={styles.stepTextInactive}>Carrito</Text>
+          </View>
+          <View style={styles.progressLine} />
+          <View style={styles.step}>
+            <View style={styles.stepIconActive}>
+              <Icon name="credit-card" size={20} color="#000" />
+            </View>
+            <Text style={styles.stepTextActive}>Pago</Text>
+          </View>
+        </View>
+      </View>
+      
+      <View style={styles.mainContent}>
         <View style={styles.card}>
           <View style={styles.columnsContainer}>
             {/* Columna Método de Pago */}
@@ -198,25 +226,41 @@ const InfoCompra = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 15,
+    elevation: 2,
+  },
+  mainContent: {
+    flex: 1,
+    marginTop: 30,
     padding: 20,
-    marginTop: 20,
+    alignItems: 'center',
   },
   card: {
     backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 30,
+    borderRadius: 15,
+    padding: 35,
     width: '90%',
     maxWidth: 900,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 3,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
     elevation: 5,
   },
   columnsContainer: {
@@ -230,26 +274,36 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
+    fontWeight: '600',
+    marginBottom: 25,
+    color: '#2d3436',
+    borderBottom: '2px solid #f1f2f6',
+    paddingBottom: 10,
   },
   inputGroup: {
     marginBottom: 15,
   },
   label: {
-    fontSize: 16,
+    fontSize: 15,
     marginBottom: 8,
-    color: '#666',
+    color: '#4a4a4a',
+    fontWeight: '500',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    padding: 12,
-    marginBottom: 15,
+    borderColor: '#e1e4e8',
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 18,
     backgroundColor: 'white',
     fontSize: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
   row: {
     flexDirection: 'row',
@@ -261,10 +315,17 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    marginBottom: 15,
-    backgroundColor: '#f9f9f9',
+    borderColor: '#e1e4e8',
+    borderRadius: 8,
+    marginBottom: 18,
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
   pickerWithIcon: {
     flexDirection: 'row',
@@ -289,22 +350,86 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
-    borderRadius: 4,
-    marginTop: 0,
+    padding: 16,
+    borderRadius: 8,
+    marginTop: 10,
+    shadowColor: '#FF4D4D',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 17,
     marginLeft: 10,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   totalText: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '600',
     textAlign: 'center',
-    marginTop: 50,
-    color: '#333',
+    marginTop: 30,
+    color: '#2d3436',
+    padding: 15,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+  },
+  backButton: {
+    padding: 5,
+  },
+  progressBar: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: -24,
+  },
+  step: {
+    alignItems: 'center',
+  },
+  stepIconActive: {
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    backgroundColor: '#fff',
+    borderWidth: 2.5,
+    borderColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  stepIconInactive: {
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    backgroundColor: '#fff',
+    borderWidth: 2.5,
+    borderColor: '#e0e0e0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  progressLine: {
+    width: 100,
+    height: 2.5,
+    backgroundColor: '#e0e0e0',
+    marginHorizontal: 15,
+  },
+  stepTextActive: {
+    fontSize: 12,
+    marginTop: 4,
+    color: '#000',
+  },
+  stepTextInactive: {
+    fontSize: 12,
+    marginTop: 4,
+    color: '#999',
   },
 });
 
