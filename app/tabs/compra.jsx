@@ -74,9 +74,9 @@ const Compra = () => {
       <Header />
       <View style={{ 
         flex: 1, 
-      backgroundColor: '#fff',
-      padding: 20
-    }}>
+        backgroundColor: '#FFFFFF',
+        padding: 85,
+      }}>
       <View style={{ 
         flexDirection: 'row',
         gap: 60,
