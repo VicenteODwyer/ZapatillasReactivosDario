@@ -1,8 +1,8 @@
 import { StyleSheet, Platform } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../../firebase/FirebaseConfig';
 import { useUser } from '../../firebase/useUser';
 import Header from '../../components/Header';
@@ -18,6 +18,33 @@ export default function RegisterScreen() {
   });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUserData({
+          nombre: user.displayName || 'Usuario',
+          email: user.email
+        });
+      } else {
+        setUserData(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUserData(null);
+      Alert.alert('Éxito', 'Sesión cerrada correctamente');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      Alert.alert('Error', 'No se pudo cerrar la sesión');
+    }
+  };
 
   const handleInputChange = (name, value) => {
     setFormData(prevData => ({
@@ -67,6 +94,7 @@ export default function RegisterScreen() {
       };
 
       await createUser(userData);
+      setUserData(userData);
 
       Alert.alert(
         'Éxito',
@@ -74,7 +102,7 @@ export default function RegisterScreen() {
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('login')
+            onPress: () => {}
           }
         ]
       );
@@ -107,72 +135,88 @@ export default function RegisterScreen() {
       <Header />
       <View style={styles.container}>
         <View style={[styles.content, Platform.OS === 'web' ? styles.webContent : styles.mobileContent]}>
-          <View style={[styles.card, Platform.OS === 'web' ? styles.webCard : styles.mobileCard]}>
-            <Text style={styles.title}>REGISTRO</Text>
-            
-            <Text style={styles.label}>Nombre completo</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ingrese su nombre completo"
-              value={formData.nombre}
-              onChangeText={(value) => handleInputChange('nombre', value)}
-              editable={!loading}
-            />
-            
-            <Text style={styles.label}>Correo electrónico</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ingrese su correo electrónico"
-              value={formData.email}
-              onChangeText={(value) => handleInputChange('email', value)}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              editable={!loading}
-            />
-            
-            <Text style={styles.label}>Contraseña</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ingrese su contraseña"
-              value={formData.password}
-              onChangeText={(value) => handleInputChange('password', value)}
-              secureTextEntry
-              editable={!loading}
-            />
-            
-            <Text style={styles.label}>Confirmar contraseña</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirme su contraseña"
-              value={formData.confirmPassword}
-              onChangeText={(value) => handleInputChange('confirmPassword', value)}
-              secureTextEntry
-              editable={!loading}
-            />
+          {userData ? (
+            <View style={[styles.card, Platform.OS === 'web' ? styles.webCard : styles.mobileCard]}>
+              <Text style={styles.title}>INFORMACIÓN DEL USUARIO</Text>
+              <View style={styles.userInfo}>
+                <Text style={styles.userInfoText}>Nombre: {userData.nombre}</Text>
+                <Text style={styles.userInfoText}>Email: {userData.email}</Text>
+              </View>
+              <TouchableOpacity 
+                style={[styles.button, styles.logoutButton]}
+                onPress={handleLogout}
+              >
+                <Text style={styles.buttonText}>Cerrar Sesión</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={[styles.card, Platform.OS === 'web' ? styles.webCard : styles.mobileCard]}>
+              <Text style={styles.title}>REGISTRO</Text>
+              
+              <Text style={styles.label}>Nombre completo</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ingrese su nombre completo"
+                value={formData.nombre}
+                onChangeText={(value) => handleInputChange('nombre', value)}
+                editable={!loading}
+              />
+              
+              <Text style={styles.label}>Correo electrónico</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ingrese su correo electrónico"
+                value={formData.email}
+                onChangeText={(value) => handleInputChange('email', value)}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                editable={!loading}
+              />
+              
+              <Text style={styles.label}>Contraseña</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ingrese su contraseña"
+                value={formData.password}
+                onChangeText={(value) => handleInputChange('password', value)}
+                secureTextEntry
+                editable={!loading}
+              />
+              
+              <Text style={styles.label}>Confirmar contraseña</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Confirme su contraseña"
+                value={formData.confirmPassword}
+                onChangeText={(value) => handleInputChange('confirmPassword', value)}
+                secureTextEntry
+                editable={!loading}
+              />
 
-            {errorMessage ? (
-              <Text style={styles.errorMessage}>
-                {errorMessage}
-              </Text>
-            ) : null}
+              {errorMessage ? (
+                <Text style={styles.errorMessage}>
+                  {errorMessage}
+                </Text>
+              ) : null}
 
-            <TouchableOpacity 
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleRegister}
-              disabled={loading}
-            >
-              <Text style={styles.buttonText}>
-                {loading ? 'Registrando...' : 'Registrarse'}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleRegister}
+                disabled={loading}
+              >
+                <Text style={styles.buttonText}>
+                  {loading ? 'Registrando...' : 'Registrarse'}
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('login')}
-              disabled={loading}
-            >
-              <Text style={styles.loginLink}>¿YA TIENES CUENTA? INICIA SESIÓN</Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('login')}
+                disabled={loading}
+              >
+                <Text style={styles.loginLink}>¿YA TIENES CUENTA? INICIA SESIÓN</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
     </View>
@@ -208,6 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     padding: 32,
     width: '100%',
+    maxWidth: 450,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -303,5 +348,19 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginTop: -5,
     fontWeight: '500',
-  }
+  },
+  userInfo: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  userInfoText: {
+    fontSize: 18,
+    marginBottom: 10,
+    color: '#333',
+    fontWeight: '500',
+  },
+  logoutButton: {
+    backgroundColor: '#FF4444',
+    marginTop: 30,
+  },
 });

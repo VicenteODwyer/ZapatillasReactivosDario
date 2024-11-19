@@ -5,8 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 import Header from '../../components/Header';
 import { useAuth } from '../../firebase/useAuth';
 import { auth } from '../../firebase/FirebaseConfig';
-import { onAuthStateChanged, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { onAuthStateChanged, setPersistence, browserLocalPersistence, signOut } from 'firebase/auth';
 import { router } from 'expo-router';
+import { useUser } from '../../firebase/useUser';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -16,6 +17,8 @@ export default function LoginScreen() {
     email: '',
     password: ''
   });
+  const { user } = useUser();
+  const [userData, setUserData] = useState(null);
 
   // Verificar el estado de autenticación
   useEffect(() => {
@@ -26,10 +29,14 @@ export default function LoginScreen() {
 
     setupAuth();
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Usuario está autenticado, redirigir a inicio
-        navigation.replace('Home');
+        setUserData({
+          nombre: user.displayName || 'Usuario',
+          email: user.email
+        });
+      } else {
+        setUserData(null);
       }
     });
 
@@ -82,65 +89,92 @@ export default function LoginScreen() {
     navigation.navigate('resetPassword');
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUserData(null);
+      Alert.alert('Éxito', 'Sesión cerrada correctamente');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      Alert.alert('Error', 'No se pudo cerrar la sesión');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Header />
       <View style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.title}>INICIAR SESIÓN</Text>
-          
-          <Text style={styles.label}>Correo electrónico</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingrese su correo electrónico"
-            value={formData.email}
-            onChangeText={(value) => handleInputChange('email', value)}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={!loading}
-          />
-          
-          <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingrese su contraseña"
-            value={formData.password}
-            onChangeText={(value) => handleInputChange('password', value)}
-            secureTextEntry
-            editable={!loading}
-          />
+        {userData ? (
+          <View style={styles.card}>
+            <Text style={styles.title}>INFORMACIÓN DEL USUARIO</Text>
+            <View style={styles.userInfo}>
+              <Text style={styles.userInfoText}>Nombre: {userData.nombre}</Text>
+              <Text style={styles.userInfoText}>Email: {userData.email}</Text>
+            </View>
+            <TouchableOpacity 
+              style={[styles.button, styles.logoutButton]}
+              onPress={handleLogout}
+            >
+              <Text style={styles.buttonText}>Cerrar Sesión</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.card}>
+            <Text style={styles.title}>INICIAR SESIÓN</Text>
+            
+            <Text style={styles.label}>Correo electrónico</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese su correo electrónico"
+              value={formData.email}
+              onChangeText={(value) => handleInputChange('email', value)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!loading}
+            />
+            
+            <Text style={styles.label}>Contraseña</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese su contraseña"
+              value={formData.password}
+              onChangeText={(value) => handleInputChange('password', value)}
+              secureTextEntry
+              editable={!loading}
+            />
 
-          {errorMessage ? (
-            <Text style={styles.errorMessage}>
-              {errorMessage}
-            </Text>
-          ) : null}
+            {errorMessage ? (
+              <Text style={styles.errorMessage}>
+                {errorMessage}
+              </Text>
+            ) : null}
 
-          <TouchableOpacity 
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            onPress={handleForgotPassword}
-            disabled={loading}
-          >
-            <Text style={styles.forgotPassword}>¿OLVIDASTE TU CONTRASEÑA?</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={handleForgotPassword}
+              disabled={loading}
+            >
+              <Text style={styles.forgotPassword}>¿OLVIDASTE TU CONTRASEÑA?</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('register')}
-            disabled={loading}
-            style={styles.registerLink}
-          >
-            <Text style={styles.registerText}>¿NO TIENES CUENTA? REGÍSTRATE</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('register')}
+              disabled={loading}
+              style={styles.registerLink}
+            >
+              <Text style={styles.registerText}>¿NO TIENES CUENTA? REGÍSTRATE</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -163,7 +197,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     padding: 32,
     width: '100%',
-    maxWidth: 450,
+    maxWidth: 475,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -262,5 +296,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,68,68,0.08)',
     padding: 12,
     borderRadius: 16,
+  },
+  userInfo: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  userInfoText: {
+    fontSize: 18,
+    marginBottom: 10,
+    color: '#333',
+    fontWeight: '500',
+  },
+  logoutButton: {
+    backgroundColor: '#FF4444', // Color rojo para el botón de cerrar sesión
+    marginTop: 30,
   },
 });
