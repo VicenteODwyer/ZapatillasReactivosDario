@@ -179,106 +179,6 @@ const InfoCompra = () => {
       <ScrollView style={styles.mainContainer}>
         <View style={styles.contentWrapper}>
           <View style={styles.formColumn}>
-            <View style={styles.paymentSection}>
-              <Text style={styles.sectionTitle}>
-                Método de Pago <Text style={styles.requiredField}>*</Text>
-              </Text>
-              
-              <View style={[
-                styles.cardSelector,
-                errors.tarjeta && styles.cardSelectorError
-              ]}>
-                <TouchableOpacity 
-                  onPress={() => {
-                    handleCardSelection('visa');
-                    setErrors(prev => ({...prev, tarjeta: null}));
-                  }}
-                  style={[
-                    styles.cardOption, 
-                    formData.tarjeta === 'visa' && styles.cardOptionSelected
-                  ]}>
-                  <Image source={visaIcon} style={styles.cardIcon} />
-                  <Text style={styles.cardText}>Visa</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  onPress={() => {
-                    handleCardSelection('mastercard');
-                    setErrors(prev => ({...prev, tarjeta: null}));
-                  }}
-                  style={[
-                    styles.cardOption, 
-                    formData.tarjeta === 'mastercard' && styles.cardOptionSelected
-                  ]}>
-                  <Image source={mastercardIcon} style={styles.cardIcon} />
-                  <Text style={styles.cardText}>Mastercard</Text>
-                </TouchableOpacity>
-              </View>
-              
-              {errors.tarjeta && (
-                <Text style={styles.errorText}>{errors.tarjeta}</Text>
-              )}
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Número de Tarjeta</Text>
-                <TextInput 
-                  style={getInputStyle('numeroTarjeta')}
-                  placeholder="1234 5678 9012 3456"
-                  placeholderTextColor="#999"
-                  keyboardType="numeric"
-                  value={formData.numeroTarjeta}
-                  onChangeText={(value) => {
-                    handleInputChange('numeroTarjeta', value);
-                    setErrors(prev => ({...prev, numeroTarjeta: null}));
-                  }}
-                  maxLength={16}
-                />
-                {errors.numeroTarjeta && (
-                  <Text style={styles.errorText}>{errors.numeroTarjeta}</Text>
-                )}
-              </View>
-
-              <View style={styles.row}>
-                <View style={styles.halfWidth}>
-                  <Text style={styles.inputLabel}>Vencimiento</Text>
-                  <TextInput 
-                    style={getInputStyle('vencimiento')}
-                    placeholder="MM/YY"
-                    placeholderTextColor="#999"
-                    keyboardType="numeric"
-                    value={formData.vencimiento}
-                    onChangeText={(value) => {
-                      handleInputChange('vencimiento', value);
-                      setErrors(prev => ({...prev, vencimiento: null}));
-                    }}
-                    maxLength={4}
-                  />
-                  {errors.vencimiento && (
-                    <Text style={styles.errorText}>{errors.vencimiento}</Text>
-                  )}
-                </View>
-                <View style={styles.halfWidth}>
-                  <Text style={styles.inputLabel}>CVV</Text>
-                  <TextInput 
-                    style={getInputStyle('cvv')}
-                    placeholder="123"
-                    placeholderTextColor="#999"
-                    secureTextEntry
-                    keyboardType="numeric"
-                    value={formData.cvv}
-                    onChangeText={(value) => {
-                      handleInputChange('cvv', value);
-                      setErrors(prev => ({...prev, cvv: null}));
-                    }}
-                    maxLength={3}
-                  />
-                  {errors.cvv && (
-                    <Text style={styles.errorText}>{errors.cvv}</Text>
-                  )}
-                </View>
-              </View>
-            </View>
-
             <View style={styles.personalDataSection}>
               <Text style={styles.sectionTitle}>Datos Personales</Text>
               
@@ -419,7 +319,7 @@ const InfoCompra = () => {
             </View>
           </View>
           
-          <View style={styles.summaryColumn}>
+          <View style={styles.rightColumn}>
             <View style={styles.summaryCard}>
               <Text style={styles.summaryTitle}>Resumen de Compra</Text>
               <View style={styles.summaryRow}>
@@ -429,6 +329,106 @@ const InfoCompra = () => {
               <TouchableOpacity style={styles.checkoutButton} onPress={handleSubmit}>
                 <Text style={styles.checkoutButtonText}>Finalizar Compra</Text>
               </TouchableOpacity>
+            </View>
+
+            <View style={styles.paymentSection}>
+              <Text style={styles.sectionTitle}>
+                Método de Pago <Text style={styles.requiredField}>*</Text>
+              </Text>
+              
+              <View style={[
+                styles.cardSelector,
+                errors.tarjeta && styles.cardSelectorError
+              ]}>
+                <TouchableOpacity 
+                  onPress={() => {
+                    handleCardSelection('visa');
+                    setErrors(prev => ({...prev, tarjeta: null}));
+                  }}
+                  style={[
+                    styles.cardOption, 
+                    formData.tarjeta === 'visa' && styles.cardOptionSelected
+                  ]}>
+                  <Image source={visaIcon} style={styles.cardIcon} />
+                  <Text style={styles.cardText}>Visa</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  onPress={() => {
+                    handleCardSelection('mastercard');
+                    setErrors(prev => ({...prev, tarjeta: null}));
+                  }}
+                  style={[
+                    styles.cardOption, 
+                    formData.tarjeta === 'mastercard' && styles.cardOptionSelected
+                  ]}>
+                  <Image source={mastercardIcon} style={styles.cardIcon} />
+                  <Text style={styles.cardText}>Mastercard</Text>
+                </TouchableOpacity>
+              </View>
+              
+              {errors.tarjeta && (
+                <Text style={styles.errorText}>{errors.tarjeta}</Text>
+              )}
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Número de Tarjeta</Text>
+                <TextInput 
+                  style={getInputStyle('numeroTarjeta')}
+                  placeholder="1234 5678 9012 3456"
+                  placeholderTextColor="#999"
+                  keyboardType="numeric"
+                  value={formData.numeroTarjeta}
+                  onChangeText={(value) => {
+                    handleInputChange('numeroTarjeta', value);
+                    setErrors(prev => ({...prev, numeroTarjeta: null}));
+                  }}
+                  maxLength={16}
+                />
+                {errors.numeroTarjeta && (
+                  <Text style={styles.errorText}>{errors.numeroTarjeta}</Text>
+                )}
+              </View>
+
+              <View style={styles.row}>
+                <View style={styles.halfWidth}>
+                  <Text style={styles.inputLabel}>Vencimiento</Text>
+                  <TextInput 
+                    style={getInputStyle('vencimiento')}
+                    placeholder="MM/YY"
+                    placeholderTextColor="#999"
+                    keyboardType="numeric"
+                    value={formData.vencimiento}
+                    onChangeText={(value) => {
+                      handleInputChange('vencimiento', value);
+                      setErrors(prev => ({...prev, vencimiento: null}));
+                    }}
+                    maxLength={4}
+                  />
+                  {errors.vencimiento && (
+                    <Text style={styles.errorText}>{errors.vencimiento}</Text>
+                  )}
+                </View>
+                <View style={styles.halfWidth}>
+                  <Text style={styles.inputLabel}>CVV</Text>
+                  <TextInput 
+                    style={getInputStyle('cvv')}
+                    placeholder="123"
+                    placeholderTextColor="#999"
+                    secureTextEntry
+                    keyboardType="numeric"
+                    value={formData.cvv}
+                    onChangeText={(value) => {
+                      handleInputChange('cvv', value);
+                      setErrors(prev => ({...prev, cvv: null}));
+                    }}
+                    maxLength={3}
+                  />
+                  {errors.cvv && (
+                    <Text style={styles.errorText}>{errors.cvv}</Text>
+                  )}
+                </View>
+              </View>
             </View>
           </View>
         </View>
@@ -498,14 +498,15 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
+    marginTop: 40,
+    marginLeft: 30,
+    marginRight: 30,
     backgroundColor: '#fff',
   },
   contentWrapper: {
     flexDirection: 'row',
-    paddingVertical: 20,
-    paddingHorizontal: 30,
-    marginHorizontal: 20,
-    marginVertical: 20,
+    padding: 30,
+    gap: 30,
   },
   formColumn: {
     flex: 3,
@@ -513,9 +514,11 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: '#eee',
   },
-  summaryColumn: {
+  rightColumn: {
     flex: 2,
-    paddingLeft: 30,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 20,
   },
   summaryCard: {
     padding: 20,
@@ -554,7 +557,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 15,
     padding: 20,
-    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
