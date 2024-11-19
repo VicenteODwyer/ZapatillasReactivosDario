@@ -17,6 +17,7 @@ export default function RegisterScreen() {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleInputChange = (name, value) => {
     setFormData(prevData => ({
@@ -26,19 +27,22 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
+    // Resetear mensaje de error al inicio
+    setErrorMessage('');
+
     // Validaciones básicas
     if (!formData.nombre || !formData.email || !formData.password || !formData.confirmPassword) {
-      Alert.alert('Error', 'Por favor, complete todos los campos');
+      setErrorMessage('Por favor, complete todos los campos');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      setErrorMessage('Las contraseñas no coinciden');
       return;
     }
 
     if (formData.password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      setErrorMessage('La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
@@ -76,27 +80,23 @@ export default function RegisterScreen() {
       );
       
     } catch (error) {
-      let errorMessage = 'Error al registrar usuario';
-      
       switch (error.code) {
         case 'auth/email-already-in-use':
-          errorMessage = 'El correo electrónico ya está registrado';
+          setErrorMessage('El correo electrónico ya está registrado');
           break;
         case 'auth/invalid-email':
-          errorMessage = 'Correo electrónico inválido';
+          setErrorMessage('Correo electrónico inválido');
           break;
         case 'auth/weak-password':
-          errorMessage = 'La contraseña debe tener al menos 6 caracteres';
+          setErrorMessage('La contraseña debe tener al menos 6 caracteres');
           break;
         case 'auth/network-request-failed':
-          errorMessage = 'Error de conexión. Verifica tu internet';
+          setErrorMessage('Error de conexión. Verifica tu internet');
           break;
         default:
-          errorMessage = 'Error al registrar usuario. Intenta nuevamente';
+          setErrorMessage('Error al registrar usuario. Intenta nuevamente');
           console.error('Error detallado:', error);
       }
-      
-      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -148,6 +148,12 @@ export default function RegisterScreen() {
             secureTextEntry
             editable={!loading}
           />
+
+          {errorMessage ? (
+            <Text style={styles.errorMessage}>
+              {errorMessage}
+            </Text>
+          ) : null}
 
           <TouchableOpacity 
             style={[styles.button, loading && styles.buttonDisabled]}
@@ -258,5 +264,13 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: '#333',
-  }
+  },
+  errorMessage: {
+    color: '#ff3333',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 15,
+    marginTop: -5,
+    fontWeight: '500',
+  },
 });

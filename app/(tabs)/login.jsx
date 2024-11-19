@@ -11,6 +11,7 @@ import { router } from 'expo-router';
 export default function LoginScreen() {
   const navigation = useNavigation();
   const { login, loading, error } = useAuth();
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -40,11 +41,16 @@ export default function LoginScreen() {
       ...prevData,
       [name]: value
     }));
+    // Limpiar mensaje de error cuando el usuario empiece a escribir
+    setErrorMessage('');
   };
 
   const handleLogin = async () => {
+    // Resetear mensaje de error
+    setErrorMessage('');
+
     if (!formData.email || !formData.password) {
-      Alert.alert('Error', 'Por favor, complete todos los campos');
+      setErrorMessage('Por favor, complete todos los campos');
       return;
     }
 
@@ -52,20 +58,23 @@ export default function LoginScreen() {
       await login(formData.email, formData.password);
       navigation.navigate('index');
     } catch (err) {
-      let errorMessage = 'Error al iniciar sesión';
-      
-      // Personalizar mensajes de error
-      if (err.code === 'auth/user-not-found') {
-        errorMessage = 'Usuario no encontrado';
-      } else if (err.code === 'auth/wrong-password') {
-        errorMessage = 'Contraseña incorrecta';
-      } else if (err.code === 'auth/invalid-email') {
-        errorMessage = 'Correo electrónico inválido';
-      } else if (err.code === 'auth/too-many-requests') {
-        errorMessage = 'Demasiados intentos fallidos. Por favor, intente más tarde';
+      switch (err.code) {
+        case 'auth/user-not-found':
+          setErrorMessage('Usuario no encontrado');
+          break;
+        case 'auth/wrong-password':
+          setErrorMessage('Contraseña incorrecta');
+          break;
+        case 'auth/invalid-email':
+          setErrorMessage('Correo electrónico inválido');
+          break;
+        case 'auth/too-many-requests':
+          setErrorMessage('Demasiados intentos fallidos. Por favor, intente más tarde');
+          break;
+        default:
+          setErrorMessage('Error al iniciar sesión');
+          console.error('Error detallado:', err);
       }
-      
-      Alert.alert('Error', errorMessage);
     }
   };
 
@@ -100,6 +109,12 @@ export default function LoginScreen() {
             secureTextEntry
             editable={!loading}
           />
+
+          {errorMessage ? (
+            <Text style={styles.errorMessage}>
+              {errorMessage}
+            </Text>
+          ) : null}
 
           <TouchableOpacity 
             style={[styles.button, loading && styles.buttonDisabled]}
@@ -226,5 +241,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     letterSpacing: 0.5,
-  }
+  },
+  errorMessage: {
+    color: '#ff3333',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 15,
+    marginTop: -5,
+    fontWeight: '500',
+  },
 });
