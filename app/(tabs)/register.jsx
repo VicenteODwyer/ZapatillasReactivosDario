@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -106,71 +106,73 @@ export default function RegisterScreen() {
     <View style={styles.mainContainer}>
       <Header />
       <View style={styles.container}>
-        <View style={styles.card}>
-          <Text style={styles.title}>REGISTRO</Text>
-          
-          <Text style={styles.label}>Nombre completo</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingrese su nombre completo"
-            value={formData.nombre}
-            onChangeText={(value) => handleInputChange('nombre', value)}
-            editable={!loading}
-          />
-          
-          <Text style={styles.label}>Correo electrónico</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingrese su correo electrónico"
-            value={formData.email}
-            onChangeText={(value) => handleInputChange('email', value)}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={!loading}
-          />
-          
-          <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingrese su contraseña"
-            value={formData.password}
-            onChangeText={(value) => handleInputChange('password', value)}
-            secureTextEntry
-            editable={!loading}
-          />
-          
-          <Text style={styles.label}>Confirmar contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Confirme su contraseña"
-            value={formData.confirmPassword}
-            onChangeText={(value) => handleInputChange('confirmPassword', value)}
-            secureTextEntry
-            editable={!loading}
-          />
+        <View style={[styles.content, Platform.OS === 'web' ? styles.webContent : styles.mobileContent]}>
+          <View style={[styles.card, Platform.OS === 'web' ? styles.webCard : styles.mobileCard]}>
+            <Text style={styles.title}>REGISTRO</Text>
+            
+            <Text style={styles.label}>Nombre completo</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese su nombre completo"
+              value={formData.nombre}
+              onChangeText={(value) => handleInputChange('nombre', value)}
+              editable={!loading}
+            />
+            
+            <Text style={styles.label}>Correo electrónico</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese su correo electrónico"
+              value={formData.email}
+              onChangeText={(value) => handleInputChange('email', value)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!loading}
+            />
+            
+            <Text style={styles.label}>Contraseña</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese su contraseña"
+              value={formData.password}
+              onChangeText={(value) => handleInputChange('password', value)}
+              secureTextEntry
+              editable={!loading}
+            />
+            
+            <Text style={styles.label}>Confirmar contraseña</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Confirme su contraseña"
+              value={formData.confirmPassword}
+              onChangeText={(value) => handleInputChange('confirmPassword', value)}
+              secureTextEntry
+              editable={!loading}
+            />
 
-          {errorMessage ? (
-            <Text style={styles.errorMessage}>
-              {errorMessage}
-            </Text>
-          ) : null}
+            {errorMessage ? (
+              <Text style={styles.errorMessage}>
+                {errorMessage}
+              </Text>
+            ) : null}
 
-          <TouchableOpacity 
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleRegister}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? 'Registrando...' : 'Registrarse'}
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={handleRegister}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? 'Registrando...' : 'Registrarse'}
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('login')}
-            disabled={loading}
-          >
-            <Text style={styles.loginLink}>¿YA TIENES CUENTA? INICIA SESIÓN</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('login')}
+              disabled={loading}
+            >
+              <Text style={styles.loginLink}>¿YA TIENES CUENTA? INICIA SESIÓN</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
@@ -180,90 +182,119 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f8f8f8',
   },
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f8f8f8',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    padding: 20,
+  },
+  webContent: {
+    maxWidth: 1200,
+    marginHorizontal: 'auto',
+    width: '100%',
+    paddingTop: 40,
+  },
+  mobileContent: {
+    paddingHorizontal: 15,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    padding: 40,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 40,
+    padding: 32,
+    width: '100%',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 8,
+      height: 20,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-    width: '100%',
-    maxWidth: 480,
+    shadowOpacity: 0.1,
+    shadowRadius: 30,
+    elevation: 15,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: 'rgba(0,0,0,0.06)',
+  },
+  webCard: {
+    maxWidth: 480,
+    marginHorizontal: 'auto',
+  },
+  mobileCard: {
+    maxWidth: '100%',
+    borderRadius: 30,
+    padding: 24,
   },
   title: {
-    fontSize: 28,
+    fontSize: Platform.OS === 'ios' ? 36 : 32,
     fontWeight: '800',
-    marginBottom: 35,
+    marginBottom: 40,
     textAlign: 'center',
-    color: '#000',
-    letterSpacing: 1,
+    color: '#1a1a1a',
+    letterSpacing: 2,
   },
   label: {
-    fontSize: 14,
+    fontSize: 16,
     marginBottom: 8,
-    color: '#1a1a1a',
+    color: '#666',
     fontWeight: '600',
     letterSpacing: 0.5,
+    marginLeft: 4,
   },
   input: {
     width: '100%',
-    height: 55,
+    height: 60,
     borderWidth: 1.5,
-    borderColor: '#000',
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    marginBottom: 20,
+    borderColor: '#E0E0E0',
+    borderRadius: 20,
+    paddingHorizontal: 24,
+    marginBottom: 24,
     fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  button: {
-    backgroundColor: '#000',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 15,
-    marginBottom: 15,
+    backgroundColor: '#F8F9FA',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  button: {
+    backgroundColor: '#000000',
+    padding: 20,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  loginLink: {
-    color: '#000',
-    textAlign: 'center',
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    marginTop: 10,
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 1,
   },
   buttonDisabled: {
-    backgroundColor: '#333',
+    backgroundColor: '#CCCCCC',
+    opacity: 0.9,
+  },
+  loginLink: {
+    color: '#666666',
+    textAlign: 'center',
+    marginTop: 32,
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   errorMessage: {
     color: '#ff3333',
@@ -272,5 +303,5 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginTop: -5,
     fontWeight: '500',
-  },
+  }
 });

@@ -3,8 +3,9 @@ import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Pressable, 
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-const Header = ({ onSearch }) => {
+const Header = ({ onSearch, isAuthenticated }) => {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [profileMenuVisible, setProfileMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation();
 
@@ -16,6 +17,11 @@ const Header = ({ onSearch }) => {
   const handleSearch = (text) => {
     setSearchQuery(text);
     onSearch(text);
+  };
+
+  const handleLogout = () => {
+    setProfileMenuVisible(false);
+    navigation.navigate('login');
   };
 
   return (
@@ -64,7 +70,10 @@ const Header = ({ onSearch }) => {
           >
             <Ionicons name="cart-outline" size={44} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => setProfileMenuVisible(!profileMenuVisible)}
+          >
             <Ionicons name="person-outline" size={44} color="black" />
           </TouchableOpacity>
         </View>
@@ -121,6 +130,59 @@ const Header = ({ onSearch }) => {
               <Ionicons name="person-add-outline" size={24} color="#555" />
               <Text style={styles.menuText}>Registro</Text>
             </Pressable>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        animationType="none"
+        transparent={true}
+        visible={profileMenuVisible}
+        onRequestClose={() => setProfileMenuVisible(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlayContainer}
+          activeOpacity={1}
+          onPress={() => setProfileMenuVisible(false)}
+        >
+          <View style={[styles.menuContainer, styles.profileMenuContainer]} onStartShouldSetResponder={(event) => {
+            event.stopPropagation();
+            return true;
+          }}>
+            {isAuthenticated ? (
+              <>
+                <View style={styles.profileInfo}>
+                  <Ionicons name="person-circle-outline" size={40} color="#555" />
+                  <Text style={styles.userName}>Nombre del Usuario</Text>
+                </View>
+                
+                <View style={styles.separator} />
+                
+                <Pressable 
+                  style={({ hovered }) => [
+                    styles.menuItem,
+                    hovered && styles.menuItemHovered
+                  ]}
+                  onPress={handleLogout}
+                >
+                  <Ionicons name="log-out-outline" size={24} color="#555" />
+                  <Text style={styles.menuText}>Cerrar Sesión</Text>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                <Pressable 
+                  style={({ hovered }) => [
+                    styles.menuItem,
+                    hovered && styles.menuItemHovered
+                  ]}
+                  onPress={() => handleNavigation('login')}
+                >
+                  <Ionicons name="log-in-outline" size={24} color="#555" />
+                  <Text style={styles.menuText}>Iniciar Sesión</Text>
+                </Pressable>
+              </>
+            )}
           </View>
         </TouchableOpacity>
       </Modal>
@@ -267,6 +329,34 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 3.84,
     elevation: 3,
+  },
+  profileMenuContainer: {
+    right: Platform.select({
+      web: '5%',
+      default: 0
+    }),
+    left: 'auto',
+    width: Platform.select({
+      web: 300,
+      default: '60%'
+    }),
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Platform.select({
+      web: 20,
+      default: 15
+    }),
+  },
+  userName: {
+    fontSize: Platform.select({
+      web: 18,
+      default: 16
+    }),
+    marginLeft: 15,
+    fontWeight: '500',
+    color: '#333',
   },
 });
 

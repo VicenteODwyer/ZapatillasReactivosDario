@@ -169,18 +169,6 @@ const Home = () => {
                     inputRange: [0, 1],
                     outputRange: [0, -10]
                 })
-            },
-            {
-                translateX: floatValue.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 5]
-                })
-            },
-            {
-                rotate: floatValue.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0deg', '2deg']
-                })
             }
         ]
     };
@@ -267,11 +255,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
-        transform: [{
-            translateY: 0,
-            translateX: 0,
-            rotate: '0deg'
-        }],
+        transform: [
+            { translateY: 0 },
+            { translateX: 0 },
+            { rotate: '0deg' }
+        ]
     },
     cardContent: {
         padding: 15,
