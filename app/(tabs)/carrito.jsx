@@ -65,7 +65,13 @@ const Carrito = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={28} color="#000" />
+          <Icon name="arrow-back" size={32} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('index')} 
+          style={styles.homeButton}
+        >
+          <Icon name="home" size={32} color="#000" />
         </TouchableOpacity>
         <View style={styles.progressContainer}>
           <View style={styles.stepContainer}>
@@ -84,11 +90,6 @@ const Carrito = () => {
         </View>
       </View>
 
-      <View style={styles.titleContainer}>
-        <Text style={styles.cartTitle}>
-          Mi Carrito <Text style={styles.productCount}>({productos.length} productos)</Text>
-        </Text>
-      </View>
 
       <View style={styles.mainContainer}>
         <View style={styles.productsColumn}>
@@ -203,6 +204,10 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
   },
   backButton: {
+    padding: 10,
+    marginRight: 15,
+  },
+  homeButton: {
     padding: 10,
     marginRight: 15,
   },

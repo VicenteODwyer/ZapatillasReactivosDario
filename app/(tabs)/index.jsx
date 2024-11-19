@@ -15,55 +15,55 @@ const zapatillas = [
   {
     id: 1,
     nombre: "Adidas Superstar x Korn",
-    precio: 159999,
+    precio: 129999,
     imagen: require('../../assets/zapas/zapa1.webp')
   },
   {
     id: 2,
     nombre: "Nike Dunk High JBalvin",
-    precio: 159999,
+    precio: 189999,
     imagen: require('../../assets/zapas/zapa2.webp')
   },
   {
     id: 3,
-    nombre: "Nike Dunk High JBalvin",
-    precio: 159999,
+    nombre: "Nike Air Max 720",
+    precio: 179999,
     imagen: require('../../assets/zapas/zapa3.webp')
   },
   {
     id: 4,
     nombre: "Nike TN Red",
-    precio: 159999,
+    precio: 199999,
     imagen: require('../../assets/zapas/zapa4.webp')
   },
   {
     id: 5,
-    nombre: "Nike Air Max 720",
-    precio: 159999,
+    nombre: "Nike Runner ShowTheWay",
+    precio: 219999,
     imagen: require('../../assets/zapas/zapa5.webp')
   },
   {
     id: 6,
-    nombre: "Adidas Alphaedge",
-    precio: 159999,
+    nombre: "Adidas SL 72 RS",
+    precio: 169999,
     imagen: require('../../assets/zapas/zapa6.webp')
   },
   {
     id: 7,
     nombre: "Nike Mag BTTF",
-    precio: 159999,
+    precio: 299999,
     imagen: require('../../assets/zapas/zapa7.webp')
   },
   {
     id: 8,
     nombre: "Adidas Campus 00s Green",
-    precio: 159999,
+    precio: 139999,
     imagen: require('../../assets/zapas/zapa8.webp')
   },
   {
     id: 9,
     nombre: "Adidas Campus 00s Gray",
-    precio: 159999,
+    precio: 139999,
     imagen: require('../../assets/zapas/zapa9.webp')
   },
   {
@@ -96,7 +96,7 @@ const Home = () => {
     return (
         <View style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
             <Header onSearch={handleSearch} />
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.gridContainer}>
                     {zapatillasFiltradas.map((zapatilla) => (
                         <Pressable
@@ -137,15 +137,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
-        padding: 10,
-        gap: 10,
-        maxWidth: 1200,
+        padding: 40,
+        gap: 20,
+        maxWidth: 1600,
         alignSelf: 'center',
-        width: '100%'
+        width: '100%',
     },
     card: {
-        width: width < 768 ? '45%' : '22%',
-        minWidth: width < 768 ? 150 : 200,
+        width: width < 768 ? '45%' : '18%',
+        minWidth: width < 768 ? 190 : 250,
         backgroundColor: 'white',
         borderRadius: 12,
         marginBottom: 10,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     cardContent: {
-        padding: 12,
+        padding: 20,
     },
     imageContainer: {
         aspectRatio: 1,
@@ -177,12 +177,12 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     title: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: '500',
         color: '#333',
     },
     price: {
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: '700',
         color: '#000',
     }

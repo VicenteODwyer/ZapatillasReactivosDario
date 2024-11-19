@@ -119,7 +119,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            onPress={() => navigation.navigate('Register')}
+            onPress={() => navigation.navigate('register')}
             disabled={loading}
             style={styles.registerLink}
           >
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',
     borderRadius: 25,
-    padding: 40,
+    padding: 35,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
