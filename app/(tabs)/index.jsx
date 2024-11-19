@@ -9,7 +9,8 @@ import {
     ScrollView,
     useWindowDimensions,
     Animated,
-    Easing
+    Easing,
+    Platform
 } from 'react-native';
 import Header from '../../components/Header';
 import { useNavigation } from '@react-navigation/native';
@@ -78,36 +79,36 @@ const zapatillas = [
 
 ];
 
-const cardHoverStyles = {
-    '.card': {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        marginBottom: 10,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-    },
-    '.card:hover': {
-        transform: 'translateY(-10px) translateX(5px) rotate(2deg)',
-        boxShadow: '0 15px 30px rgba(0,0,0,0.2)',
-    },
-    '.card:hover .card-image': {
-        transform: 'scale(1.1) rotate(-2deg)',
-    },
-    '.card-image': {
-        transition: 'all 0.3s ease',
-        transform: 'scale(1) rotate(0deg)',
-    }
-};
+// Estilos CSS para web con elevación diagonal sutil
+const estilosAnimacion = `
+  .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 3px 3px 12px rgba(0,0,0,0.15);
+  }
+  
+  .card-image {
+    transition: transform 0.3s ease;
+  }
+  
+  .card:hover .card-image {
+    transform: scale(1.05);
+  }
 
-// Agregar los estilos al head del documento
+  /* Alternar la dirección diagonal para cards pares */
+  .card:nth-child(even):hover {
+    transform: translate(3px, -3px);
+    box-shadow: -3px 3px 12px rgba(0,0,0,0.15);
+  }
+`;
+
+// Agregar los estilos al head del documento (solo para web)
 if (typeof document !== 'undefined') {
     const style = document.createElement('style');
-    style.textContent = Object.entries(cardHoverStyles).map(([selector, rules]) => 
-        `${selector} { ${Object.entries(rules).map(([prop, value]) => 
-            `${prop.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`
-        ).join(';')} }`
-    ).join('\n');
+    style.textContent = estilosAnimacion;
     document.head.appendChild(style);
 }
 
@@ -115,13 +116,34 @@ const Home = () => {
     const { width } = useWindowDimensions();
     const navigation = useNavigation();
     const [zapatillasFiltradas, setZapatillasFiltradas] = useState(zapatillas);
+    const [hoveredId, setHoveredId] = useState(null);
+    
+    // Animación para móvil
+    const scaleAnim = useRef(new Animated.Value(1)).current;
 
-    // Calcular el número de columnas basado en el ancho de la pantalla
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.98,
+            useNativeDriver: true,
+            friction: 8,
+            tension: 100
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            friction: 8,
+            tension: 100
+        }).start();
+    };
+
     const getColumnCount = () => {
-        if (width < 600) return 2;        // Móvil: 2 columnas
-        if (width < 960) return 3;        // Tablet: 3 columnas
-        if (width < 1280) return 4;       // Desktop pequeño: 4 columnas
-        return 5;                         // Desktop grande: 5 columnas
+        if (width < 600) return 2;
+        if (width < 960) return 3;
+        if (width < 1280) return 4;
+        return 5;
     };
 
     const handleSearch = (query) => {
@@ -135,93 +157,66 @@ const Home = () => {
         setZapatillasFiltradas(filtradas);
     };
 
-    const createFloatAnimation = () => {
-        const floatValue = useRef(new Animated.Value(0)).current;
-
-        useEffect(() => {
-            Animated.loop(
-                Animated.sequence([
-                    Animated.timing(floatValue, {
-                        toValue: 1,
-                        duration: 4000,
-                        easing: Easing.inOut(Easing.ease),
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(floatValue, {
-                        toValue: 0,
-                        duration: 4000,
-                        easing: Easing.inOut(Easing.ease),
-                        useNativeDriver: true,
-                    })
-                ])
-            ).start();
-        }, []);
-
-        return floatValue;
-    };
-
-    const floatValue = createFloatAnimation();
-
-    const animatedStyle = {
-        transform: [
-            {
-                translateY: floatValue.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -10]
-                })
-            }
-        ]
-    };
-
     return (
         <View style={styles.container}>
             <Header onSearch={handleSearch} />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={[styles.gridContainer, { 
-                    paddingHorizontal: width < 600 ? 8 : 40,
-                    gap: width < 600 ? 8 : 15
+                    paddingHorizontal: width < 600 ? 12 : 40,
+                    gap: width < 600 ? 12 : 15
                 }]}>
                     {zapatillasFiltradas.map((zapatilla) => (
-                        <Pressable
+                        <Animated.View
                             key={zapatilla.id}
-                            className="card"
-                            style={[styles.card, {
-                                width: width < 600 
-                                    ? `${48}%`
-                                    : `${100 / getColumnCount() - 2}%`,
-                                minWidth: width < 600 ? 150 : 280,
-                                maxWidth: width < 600 ? '48%' : 400,
-                            }]}
-                            onPress={() => navigation.navigate('compra', { zapatilla })}
+                            style={[
+                                styles.cardContainer,
+                                {
+                                    // Solo aplicar la animación de escala en móvil
+                                    transform: Platform.OS === 'web' ? [] : [{ scale: scaleAnim }],
+                                    width: width < 600 ? '47%' : `${100 / getColumnCount() - 2}%`,
+                                }
+                            ]}
                         >
-                            <View style={[styles.cardContent, {
-                                padding: width < 600 ? 8 : 15
-                            }]}>
-                                <View style={styles.imageContainer}>
-                                    <Image
-                                        source={zapatilla.imagen}
-                                        className="card-image"
-                                        style={styles.image}
-                                        resizeMode="contain"
-                                    />
+                            <Pressable
+                                style={[
+                                    styles.card,
+                                    hoveredId === zapatilla.id && styles.cardHovered,
+                                ]}
+                                onPress={() => navigation.navigate('compra', { zapatilla })}
+                                onPressIn={Platform.OS === 'web' ? null : handlePressIn}
+                                onPressOut={Platform.OS === 'web' ? null : handlePressOut}
+                                onMouseEnter={() => setHoveredId(zapatilla.id)}
+                                onMouseLeave={() => setHoveredId(null)}
+                            >
+                                <View style={[styles.cardContent, {
+                                    padding: width < 600 ? 10 : 15
+                                }]}>
+                                    <View style={styles.imageContainer}>
+                                        <Image
+                                            source={zapatilla.imagen}
+                                            style={styles.image}
+                                            resizeMode="contain"
+                                        />
+                                    </View>
+                                    <View style={styles.textContainer}>
+                                        <Text 
+                                            numberOfLines={2} 
+                                            style={[styles.title, {
+                                                fontSize: width < 600 ? 14 : 18,
+                                                marginTop: width < 600 ? 6 : 8
+                                            }]}
+                                        >
+                                            {zapatilla.nombre}
+                                        </Text>
+                                        <Text style={[styles.price, {
+                                            fontSize: width < 600 ? 16 : 20
+                                        }]}>
+                                            ${zapatilla.precio.toLocaleString()}
+                                        </Text>
+                                    </View>
                                 </View>
-                                <View style={styles.textContainer}>
-                                    <Text 
-                                        numberOfLines={2} 
-                                        style={[styles.title, {
-                                            fontSize: width < 600 ? 14 : 18
-                                        }]}
-                                    >
-                                        {zapatilla.nombre}
-                                    </Text>
-                                    <Text style={[styles.price, {
-                                        fontSize: width < 600 ? 16 : 20
-                                    }]}>
-                                        ${zapatilla.precio.toLocaleString()}
-                                    </Text>
-                                </View>
-                            </View>
-                        </Pressable>
+                            </Pressable>
+                        </Animated.View>
                     ))}
                 </View>
             </ScrollView>
@@ -238,7 +233,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-        paddingVertical: 20,
+        paddingVertical: 16,
         maxWidth: 1600,
         alignSelf: 'center',
         width: '100%',
@@ -255,11 +250,16 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
-        transform: [
-            { translateY: 0 },
-            { translateX: 0 },
-            { rotate: '0deg' }
-        ]
+        overflow: 'hidden',
+    },
+    cardHovered: {
+        transform: [{translateY: -10}],
+        shadowOffset: {
+            width: 0,
+            height: 10,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 15,
     },
     cardContent: {
         padding: 15,
@@ -271,17 +271,18 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         borderRadius: 8,
         overflow: 'hidden',
+        padding: 8,
     },
     image: {
         width: '100%',
         height: '100%',
-        transform: [{scale: 1}],
     },
     textContainer: {
         gap: 4,
+        paddingHorizontal: 4,
     },
     title: {
-        fontWeight: '500',
+        fontWeight: '600',
         color: '#333',
         marginBottom: 4,
     },
