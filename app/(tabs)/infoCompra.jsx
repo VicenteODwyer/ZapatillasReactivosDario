@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, Image, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, Image, ScrollView, Alert, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Header from '../../components/Header';
 import visaIcon from '../../assets/visa-icon.png';
@@ -7,6 +7,9 @@ import mastercardIcon from '../../assets/mastercard-icon.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+
+const windowWidth = Dimensions.get('window').width;
+const isMobile = windowWidth < 768;
 
 const InfoCompra = () => {
   const navigation = useNavigation();
@@ -550,20 +553,18 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    marginTop: 40,
-    marginLeft: 30,
-    marginRight: 30,
-    backgroundColor: '#fff',
+    marginTop: 20,
+    marginHorizontal: isMobile ? 10 : 30,
   },
   contentWrapper: {
-    flexDirection: 'row',
-    padding: 30,
+    flexDirection: isMobile ? 'column' : 'row',
+    padding: isMobile ? 15 : 30,
     gap: 30,
   },
   formColumn: {
     flex: 3,
-    paddingRight: 30,
-    borderRightWidth: 1,
+    paddingRight: isMobile ? 0 : 30,
+    borderRightWidth: isMobile ? 0 : 1,
     borderRightColor: '#eee',
   },
   rightColumn: {
@@ -573,11 +574,12 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   summaryCard: {
-    padding: 20,
+    padding: isMobile ? 15 : 20,
     backgroundColor: '#fff',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#eee',
+    marginBottom: isMobile ? 20 : 0,
   },
   summaryTitle: {
     fontSize: 20,
@@ -596,7 +598,7 @@ const styles = StyleSheet.create({
   },
   checkoutButton: {
     backgroundColor: '#ff4646',
-    padding: 15,
+    padding: isMobile ? 12 : 15,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 20,
@@ -608,7 +610,7 @@ const styles = StyleSheet.create({
   paymentSection: {
     backgroundColor: '#fff',
     borderRadius: 15,
-    padding: 20,
+    padding: isMobile ? 15 : 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -616,32 +618,24 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: isMobile ? 18 : 22,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 20,
+    marginBottom: isMobile ? 15 : 20,
   },
   cardSelector: {
     flexDirection: 'row',
-    gap: 15,
+    gap: isMobile ? 10 : 15,
     marginBottom: 10,
-    padding: 5,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    flexWrap: 'wrap',
   },
   cardSelectorError: {
     borderColor: '#ff4646',
   },
   cardOption: {
-    flex: 1,
-    padding: 15,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 10,
+    flex: isMobile ? 0 : 1,
+    width: isMobile ? '47%' : 'auto',
+    padding: isMobile ? 12 : 15,
   },
   cardOptionSelected: {
     borderColor: '#ff4646',
@@ -665,22 +659,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 12,
-    padding: 15,
-    fontSize: 16,
+    padding: isMobile ? 12 : 15,
+    fontSize: isMobile ? 14 : 16,
     backgroundColor: '#fff',
+    width: '100%',
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: isMobile ? 'column' : 'row',
     gap: 15,
     marginBottom: 20,
   },
   halfWidth: {
-    flex: 1,
+    flex: isMobile ? 0 : 1,
+    width: isMobile ? '100%' : 'auto',
   },
   personalDataSection: {
     backgroundColor: '#fff',
     borderRadius: 15,
-    padding: 20,
+    padding: isMobile ? 15 : 20,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -701,7 +697,47 @@ const styles = StyleSheet.create({
   requiredField: {
     color: '#ff4646',
     marginLeft: 4,
-  }
+  },
+  // Nuevos estilos para móvil
+  mobileContentWrapper: {
+    flexDirection: 'column',
+    padding: 15,
+  },
+  mobileFormColumn: {
+    paddingRight: 0,
+    borderRightWidth: 0,
+    marginBottom: 20,
+  },
+  mobileRightColumn: {
+    paddingLeft: 0,
+  },
+  mobileInput: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+    width: '100%',
+  },
+  mobileRow: {
+    flexDirection: 'column',
+    gap: 10,
+    marginBottom: 15,
+  },
+  mobileCardSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  mobileCardOption: {
+    flex: 1,
+    padding: 10,
+    marginHorizontal: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    alignItems: 'center',
+  },
 });
 
 export default InfoCompra;
